@@ -3,16 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>多仔港式台牌 自動算番 2026</title>
+<title>多狗計數機v2</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans TC", sans-serif; background:#1a1a2e; color:#eee; min-height:100vh; padding:8px; padding-bottom:190px; user-select:none; }
-.header { text-align:center; padding:10px 0 8px; position:relative; }
+.header { text-align:center; padding:10px 0 8px; }
 .header h1 { font-size:18px; font-weight:800; background:linear-gradient(135deg,#f7971e,#ffd200); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .header p { font-size:11px; color:#888; margin-top:3px; }
-.api-settings-btn { position:absolute; top:10px; right:4px; background:#16213e; color:#ffd200; border:1px solid #f7971e66; border-radius:8px; padding:5px 8px; font-size:11px; font-weight:700; cursor:pointer; }
-.api-settings-btn:active { transform:scale(0.95); }
-
 .tabs { display:flex; gap:6px; margin-bottom:8px; }
 .tab { flex:1; padding:9px; text-align:center; border-radius:9px; background:#16213e; color:#888; font-size:12px; font-weight:700; cursor:pointer; border:1px solid #1a3a5a; }
 .tab.active { background:#0f3460; color:#ffd200; border-color:#f7971e; }
@@ -63,13 +60,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .hand-tile .honor.black { color:#333; }
 .hand-tile img { width:100%; height:100%; object-fit:contain; border-radius:3px; pointer-events:none; }
 
-.hand-actions { display:flex; gap:5px; position:relative; z-index:10000; }
-.hand-actions button { flex:1; padding:10px 4px; border-radius:8px; border:none; font-size:12px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; }
+.hand-actions { display:flex; gap:4px; position:relative; z-index:10000; flex-wrap: wrap; }
+.hand-actions button { flex:1; min-width: 70px; padding:10px 4px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; }
 .hand-actions button:active { transform:scale(0.95); }
-.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); flex:1.1; }
-.btn-camera { background:linear-gradient(135deg,#2980b9,#3498db); color:#fff; flex:0.85; box-shadow:0 2px 8px rgba(52,152,219,0.35); }
-.btn-clear { background:#e74c3c; color:#fff; flex:0.55; }
-.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.65; }
+.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); }
+.btn-clear { background:#e74c3c; color:#fff; flex:0.6; }
+.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.7; }
+.btn-ai { background: linear-gradient(135deg,#8e44ad,#9b59b6); color:#fff; box-shadow:0 2px 8px rgba(142,68,173,0.4); }
 
 .result-panel { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:20000; display:none; flex-direction:column; backdrop-filter:blur(8px); }
 .result-panel.show { display:flex; }
@@ -102,49 +99,46 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 }
 .confirm-overlay.show { display: flex; }
 .confirm-box {
-  background: #16213e; border-radius: 14px; padding: 22px;
-  max-width: 380px; width: 92%; border: 1px solid #f7971e55;
+  background: #16213e; border-radius: 14px; padding: 16px;
+  max-width: 420px; width: 94%; border: 1px solid #f7971e55;
   text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  max-height: 88vh; overflow-y: auto;
+  max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
-.confirm-box .c-title { font-size: 16px; font-weight: 800; color: #ffd200; margin-bottom: 8px; }
-.confirm-box .c-msg { font-size: 13px; color: #ccc; margin-bottom: 18px; line-height: 1.5; }
-.confirm-box .c-btns { display: flex; gap: 10px; }
-.confirm-box .c-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: 800; cursor: pointer; }
+.confirm-box .c-title { font-size: 17px; font-weight: 800; color: #ffd200; margin-bottom: 8px; }
+.confirm-box .c-msg { font-size: 13px; color: #ccc; margin-bottom: 14px; line-height: 1.5; }
+.confirm-box .c-btns { display: flex; gap: 10px; margin-top: 12px; }
+.confirm-box .c-btns button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 800; cursor: pointer; }
 .c-btn-yes { background: #e74c3c; color: #fff; }
 .c-btn-no { background: #16213e; color: #ffd200; border: 1px solid #f7971e55 !important; }
 
-/* 結算加番按鈕區 */
 .bonus-section { margin-top: 14px; background:#0f3460; border-radius:10px; padding:10px; border:1px solid #1a4a7a; }
 .bonus-title { font-size:12px; font-weight:800; color:#ffd200; margin-bottom:8px; }
-.bonus-group { margin-bottom:8px; }
-.bonus-group-label { font-size:10px; color:#f7971e; font-weight:700; margin-bottom:4px; }
-.bonus-btns { display:flex; flex-wrap:wrap; gap:5px; }
-.bonus-btn { padding:6px 9px; border-radius:6px; border:1px solid #1a4a7a; background:#16213e; color:#ccc; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; }
-.bonus-btn.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; box-shadow:0 0 6px rgba(247,151,30,0.5); }
-.bonus-btn:active { transform:scale(0.94); }
-.bonus-hint { font-size:9px; color:#667; margin-top:2px; line-height:1.4; }
+.bonus-group { margin-bottom:10px; }
+.bonus-group-label { font-size:11px; color:#f7971e; font-weight:700; margin-bottom:6px; }
+.bonus-btns { display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; }
+.bonus-btn { padding:10px 6px; border-radius:8px; border:1px solid #1a4a7a; background:#16213e; color:#ccc; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; text-align:center; }
+.bonus-btn.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; box-shadow:0 0 8px rgba(247,151,30,0.6); }
+.bonus-btn:active { transform:scale(0.95); }
+.bonus-hint { font-size:9px; color:#667; margin-top:4px; line-height:1.4; }
 
-/* 雙食嚦咕 variant chip */
 .variant-chip { display:inline-block; padding:2px 10px; border-radius:8px; background:#0f3460; border:1px solid #f7971e55; cursor:pointer; color:#ffd200; }
 .variant-chip.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; }
 .variant-plus { color:#f7971e; margin:0 4px; font-weight:900; }
 
-/* 確認視窗：花牌與食胡牌選擇 */
 .confirm-flower { background:#0f3460; border-radius:8px; padding:8px 10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; }
 .confirm-flower .cf-title { font-size:12px; font-weight:800; color:#ffd200; margin-bottom:6px; }
 .confirm-flower .cf-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
 .confirm-flower .cf-row:last-child { margin-bottom:0; }
 .confirm-flower .cf-label { font-size:11px; color:#ddd; }
 .confirm-flower .cf-btns { display:flex; gap:3px; }
-.confirm-flower .cf-btn { width:24px; height:24px; border-radius:4px; border:none; background:#16213e; color:#fff; font-size:11px; font-weight:800; cursor:pointer; }
+.confirm-flower .cf-btn { width:28px; height:28px; border-radius:4px; border:none; background:#16213e; color:#fff; font-size:12px; font-weight:800; cursor:pointer; }
 .confirm-flower .cf-btn.active { background:#ffd200; color:#1a1a2e; }
 
 .confirm-tiles { background:#0f3460; border-radius:8px; padding:8px 10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; }
 .confirm-tiles .ct-title { font-size:12px; font-weight:800; color:#ffd200; margin-bottom:6px; }
 .confirm-tiles .ct-hint { font-size:10px; color:#888; margin-bottom:6px; }
 .confirm-tiles .ct-grid { display:flex; flex-wrap:wrap; gap:6px; }
-.confirm-tile { width:44px; height:60px; background:linear-gradient(145deg,#f5f5f0,#e0dcd0); border-radius:6px; border:2px solid #b8b0a0; position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.confirm-tile { width:48px; height:64px; background:linear-gradient(145deg,#f5f5f0,#e0dcd0); border-radius:6px; border:2px solid #b8b0a0; position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .confirm-tile.selected { border-color:#ffd200; box-shadow:0 0 10px rgba(255,210,0,0.7); transform:scale(1.05); }
 .confirm-tile .num { font-size:20px; font-weight:900; }
 .confirm-tile .num.red { color:#cc2222; }
@@ -158,19 +152,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .confirm-tile img { width:100%; height:100%; object-fit:contain; border-radius:4px; pointer-events:none; }
 .confirm-tile .ct-tag { position:absolute; bottom:1px; left:1px; font-size:8px; font-weight:800; background:#ffd200; color:#1a1a2e; padding:0 3px; border-radius:3px; }
 
-/* AI 識牌載入與設定彈窗 */
-.ai-input { width:100%; padding:10px; border-radius:8px; border:1px solid #1a4a7a; background:#0f3460; color:#fff; font-size:13px; margin-bottom:10px; outline:none; }
-.ai-select { width:100%; padding:9px; border-radius:8px; border:1px solid #1a4a7a; background:#0f3460; color:#ffd200; font-size:12px; font-weight:700; margin-bottom:12px; outline:none; }
-.loading-spinner { width:36px; height:36px; border:4px solid #1a4a7a; border-top-color:#ffd200; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
-@keyframes spin { to { transform:rotate(360deg); } }
+.confirm-bonus { background:#0f3460; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; max-height:260px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.confirm-bonus .cf-title { font-size:13px; font-weight:800; color:#ffd200; margin-bottom:8px; }
+
+/* AI 識別面板樣式 */
+.ai-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 25000; display: none; flex-direction: column; backdrop-filter: blur(8px); }
+.ai-panel.show { display: flex; }
+.ai-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
+.ai-header h2 { font-size:18px; color:#9b59b6; }
+.ai-header button { background:#e74c3c; border:none; color:#fff; font-size:14px; padding:8px 16px; border-radius:8px; cursor:pointer; }
+.ai-body { flex:1; overflow-y:auto; padding:16px; }
+.ai-upload-box { border: 2px dashed #9b59b6; border-radius: 12px; padding: 30px 16px; text-align: center; cursor: pointer; margin-bottom: 16px; background: #16213e; }
+.ai-upload-box input { display: none; }
+.ai-upload-box .ai-icon { font-size: 40px; margin-bottom: 8px; }
+.ai-upload-box .ai-label { font-size: 13px; color: #ccc; }
+.ai-preview img { max-width: 100%; max-height: 240px; border-radius: 8px; margin-bottom: 12px; }
+.ai-status { font-size: 13px; color: #ffd200; text-align: center; min-height: 20px; margin-bottom: 8px; font-weight: bold; }
+.ai-status.error { color: #e74c3c; }
+.ai-result { background:#0f3460; border-radius:8px; padding:10px; font-size:13px; line-height:1.6; word-break:break-all; margin-bottom:12px; display:none; border:1px solid #9b59b6; }
+.ai-result.show { display:block; }
+.ai-actions { display:flex; gap:8px; margin-top:8px; }
+.ai-actions button { flex:1; padding:12px; border-radius:10px; border:none; font-size:14px; font-weight:700; cursor:pointer; }
+.ai-btn-apply { background:linear-gradient(135deg,#27ae60,#1e8449); color:#fff; }
+.ai-btn-retry { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1> 多狗計數機 </h1>
-  <p>2026測試版v2 有問題聯絡Owen </p>
-  <button class="api-settings-btn" onclick="openApiModal()">🔑 API 設定</button>
+  <p>2026測試版v1 有問題聯絡Owen </p>
 </div>
 
 <div class="tabs">
@@ -214,12 +225,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
   
   <div class="hand-actions">
-    <button class="btn-calc" onclick="openCalcConfirm()">🧮 計算番數</button>
-    <button class="btn-camera" onclick="triggerCamera()">📷 識牌</button>
+    <button class="btn-ai" onclick="openAiPanel()">📷 AI 識別</button>
+    <button class="btn-calc" onclick="openCalcConfirm()">🧮 計算</button>
     <button class="btn-clear" onclick="clearHand()">🗑 清空</button>
     <button class="btn-history2" onclick="toggleHistory()">📋 紀錄 (<span id="historyCount">0</span>)</button>
   </div>
-  <input type="file" id="cameraInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
 </div>
 
 <div class="result-panel" id="resultPanel">
@@ -242,11 +252,42 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
 </div>
 
-<!-- 計算前確認視窗：花牌配置 + 食胡牌選擇 -->
+<!-- AI 識別牌面板 -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-header">
+    <h2>📷 AI 識別牌</h2>
+    <button onclick="closeAiPanel()">✕ 關閉</button>
+  </div>
+  <div class="ai-body">
+    <div class="ai-upload-box" onclick="document.getElementById('aiFileInput').click()">
+      <div class="ai-icon">🀫</div>
+      <div class="ai-label">點擊上傳／拍攝牌面照片<br><span style="font-size:11px;color:#888;">支援 JPG、PNG（建議裁切到只剩牌面）</span></div>
+      <input type="file" id="aiFileInput" accept="image/*" capture="environment" onchange="handleAiImage(event)">
+    </div>
+
+    <div class="ai-preview" id="aiPreview"></div>
+    <div class="ai-status" id="aiStatus"></div>
+
+    <div class="ai-result" id="aiResult"></div>
+
+    <div class="ai-actions" id="aiActions" style="display:none;">
+      <button class="ai-btn-apply" onclick="applyAiResult()">✅ 套用到暗手牌</button>
+      <button class="ai-btn-retry" onclick="resetAiPanel()">🔄 重新上傳</button>
+    </div>
+
+    <div style="font-size:10px;color:#556;line-height:1.6;margin-top:16px;">
+      ※ 使用 OpenRouter 免費模型 (Nemotron 3.5 Super VL)，首次使用需貼上 API Key（僅儲存在本機）。<br>
+      ※ AI 辨識僅供輔助，套用後請人手核對每張牌。<br>
+      ※ 如辨識失敗，可嘗試裁切圖片到只剩麻將牌區域，或改用光線充足的環境重拍。
+    </div>
+  </div>
+</div>
+
+<!-- 計算前確認視窗：花牌配置 + 加番 + 食胡牌 -->
 <div class="confirm-overlay" id="calcConfirmOverlay">
   <div class="confirm-box">
     <div class="c-title">確認牌組</div>
-    <div class="c-msg">請設定花牌，並點選食胡嗰張牌</div>
+    <div class="c-msg">請設定花牌、加番，並點選食胡嗰張牌</div>
 
     <div class="confirm-flower">
       <div class="cf-title">🌸 花牌配置（每花 +2 番）</div>
@@ -273,6 +314,67 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
       <div style="font-size:10px;color:#888;margin-top:4px;">共 <span id="cfFlowerTotal">0</span> 張</div>
     </div>
 
+    <div class="confirm-bonus">
+      <div class="cf-title">➕ 加番（點擊切換）</div>
+
+      <div class="bonus-group">
+        <div class="bonus-group-label">基本狀態</div>
+        <div class="bonus-btns">
+          <button class="bonus-btn" data-bonus="selfDraw" onclick="cfToggleBonus('selfDraw', 1)">自摸</button>
+          <button class="bonus-btn" data-bonus="ding" onclick="cfToggleBonus('ding', 5)">叮</button>
+          <button class="bonus-btn" data-bonus="dingJik" onclick="cfToggleBonus('dingJik', 5)">叮即</button>
+          <button class="bonus-btn" data-bonus="robKong" onclick="cfToggleBonus('robKong', 5)">搶槓</button>
+          <button class="bonus-btn" data-bonus="doubleWin" onclick="cfToggleBonus('doubleWin', 5)">雙響</button>
+          <button class="bonus-btn" data-bonus="tripleWin" onclick="cfToggleBonus('tripleWin', 10)">三響</button>
+          <button class="bonus-btn" data-bonus="seaFish" onclick="cfToggleBonus('seaFish', 5)">海底</button>
+          <button class="bonus-btn" data-bonus="riverFish" onclick="cfToggleBonus('riverFish', 3)">河底</button>
+        </div>
+      </div>
+
+      <div class="bonus-group">
+        <div class="bonus-group-label">花摸</div>
+        <div class="bonus-btns">
+          <button class="bonus-btn" data-bonus="flower1" onclick="cfToggleBonus('flower1', 1)">花摸1</button>
+          <button class="bonus-btn" data-bonus="flower2" onclick="cfToggleBonus('flower2', 5)">花摸2</button>
+          <button class="bonus-btn" data-bonus="flower3" onclick="cfToggleBonus('flower3', 10)">花摸3</button>
+          <button class="bonus-btn" data-bonus="flower4" onclick="cfToggleBonus('flower4', 20)">花摸4</button>
+          <button class="bonus-btn" data-bonus="flower5" onclick="cfToggleBonus('flower5', 40)">花摸5</button>
+          <button class="bonus-btn" data-bonus="flower6" onclick="cfToggleBonus('flower6', 70)">花摸6</button>
+          <button class="bonus-btn" data-bonus="flower7" onclick="cfToggleBonus('flower7', 100)">花摸7</button>
+          <button class="bonus-btn" data-bonus="flower8" onclick="cfToggleBonus('flower8', 140)">花摸8</button>
+        </div>
+      </div>
+
+      <div class="bonus-group">
+        <div class="bonus-group-label">槓摸</div>
+        <div class="bonus-btns">
+          <button class="bonus-btn" data-bonus="kong1" onclick="cfToggleBonus('kong1', 1)">槓摸1</button>
+          <button class="bonus-btn" data-bonus="kong2" onclick="cfToggleBonus('kong2', 5)">槓摸2</button>
+          <button class="bonus-btn" data-bonus="kong3" onclick="cfToggleBonus('kong3', 10)">槓摸3</button>
+          <button class="bonus-btn" data-bonus="kong4" onclick="cfToggleBonus('kong4', 25)">槓摸4</button>
+          <button class="bonus-btn" data-bonus="kong5" onclick="cfToggleBonus('kong5', 50)">槓摸5</button>
+        </div>
+      </div>
+
+      <div class="bonus-group">
+        <div class="bonus-group-label">花槓自摸</div>
+        <div class="bonus-btns">
+          <button class="bonus-btn" data-bonus="flowerKong1" onclick="cfToggleBonus('flowerKong1', 8)">花槓</button>
+          <button class="bonus-btn" data-bonus="flowerKong3" onclick="cfToggleBonus('flowerKong3', 15)">花槓3</button>
+          <button class="bonus-btn" data-bonus="flowerKong4" onclick="cfToggleBonus('flowerKong4', 25)">花槓4</button>
+          <button class="bonus-btn" data-bonus="flowerKong5" onclick="cfToggleBonus('flowerKong5', 50)">花槓5</button>
+          <button class="bonus-btn" data-bonus="flowerKong6" onclick="cfToggleBonus('flowerKong6', 80)">花槓6</button>
+          <button class="bonus-btn" data-bonus="flowerKong7" onclick="cfToggleBonus('flowerKong7', 120)">花槓7</button>
+        </div>
+      </div>
+
+      <div class="bonus-hint">
+        ※ 自摸由上方按鈕控制；食胡牌所在面子非自摸時視為「明」，自摸時視為「暗」。<br>
+        ※ 叮額外：一般門清叮 +10；十六不搭／十三幺／嚦咕嚦咕門清叮只 +5。<br>
+        ※ 食胡牌所在面子明／暗不影響門清與門清叮 +10。
+      </div>
+    </div>
+
     <div class="confirm-tiles">
       <div class="ct-title">🀫 食胡牌（點選食出嗰張）</div>
       <div class="ct-hint">可選暗手牌、明手牌或槓區的牌；再按「確認計算」</div>
@@ -297,60 +399,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
 </div>
 
-<!-- AI API Key 設定彈窗（支援 OpenRouter 自動免費模型 / 智譜 AI / Gemini） -->
-<div class="confirm-overlay" id="apiModal">
-  <div class="confirm-box">
-    <div class="c-title">🔑 AI 視覺識牌設定</div>
-    <div class="c-msg" style="text-align:left; font-size:11px; margin-bottom:10px; line-height:1.6;">
-      <b>【OpenRouter 必看設定】</b>若使用 OpenRouter 免費 Key (<code>sk-or-...</code>)，請務必先點此打開：<br>
-      👉 <a href="https://openrouter.ai/settings/privacy" target="_blank" style="color:#ffd200; text-decoration:underline; font-weight:800;">openrouter.ai/settings/privacy</a><br>
-      將頁面內的 <b>「Enable free endpoints...」</b> 設為開啟，否則會出現 404 No endpoints found！<br><br>
-      其他支援平台：<a href="https://open.bigmodel.cn/usercenter/apikeys" target="_blank" style="color:#ffd200;">智譜 AI</a> ｜ <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#ffd200;">Google Gemini</a>
-    </div>
-    <input type="password" id="apiKeyInput" class="ai-input" placeholder="請貼上你的 API Key（勿留空格）">
-    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">AI 平台與免費模型：</div>
-    <select id="aiModelSelect" class="ai-select">
-      <option value="openrouter:auto-free-vision">OpenRouter：自動尋找最新可用免費視覺模型（最推薦）</option>
-      <option value="zhipu:glm-4v-flash">智譜 AI：glm-4v-flash（免費·香港直連）</option>
-      <option value="gemini:gemini-2.5-flash">Google Gemini：gemini-2.5-flash</option>
-    </select>
-    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">識牌填入模式：</div>
-    <select id="aiFillMode" class="ai-select">
-      <option value="replace">覆蓋全副牌（自動分暗牌/明牌/槓/花）</option>
-      <option value="append">只加入到目前選取的目標區域</option>
-    </select>
-    <div class="c-btns">
-      <button class="c-btn-yes" style="background:linear-gradient(135deg,#27ae60,#1e8449);" onclick="saveApiSettings()">儲存</button>
-      <button class="c-btn-no" onclick="closeApiModal()">關閉</button>
-    </div>
-  </div>
-</div>
-
-<!-- AI 辨識中載入畫面 -->
-<div class="confirm-overlay" id="aiLoadingOverlay">
-  <div class="confirm-box">
-    <div class="loading-spinner"></div>
-    <div class="c-title" id="aiLoadingTitle">🤖 AI 正在辨識麻雀牌型...</div>
-    <div class="c-msg" id="aiLoadingMsg" style="margin-bottom:0;">正在分析萬、筒、索、字牌及花牌，請稍候 2~5 秒</div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
 const TILE_DEFS = [];
-// 萬子 1m-9m
 for (let i=1;i<=9;i++) TILE_DEFS.push({ suit:'wan', num:i, id:`wan${i}`, label:i, type:'num', color:'red', img:`mjphoto/${i}m.png` });
-// 筒子 1p-9p
 for (let i=1;i<=9;i++) TILE_DEFS.push({ suit:'tong', num:i, id:`tong${i}`, label:i, type:'num', color:'blue', img:`mjphoto/${i}p.png` });
-// 索子 1s-9s
 for (let i=1;i<=9;i++) TILE_DEFS.push({ suit:'so', num:i, id:`so${i}`, label:i, type:'num', color:'green', img:`mjphoto/${i}s.png` });
-// 風牌 1z-4z（東南西北）
 TILE_DEFS.push({ suit:'wind', num:1, id:'east',  label:'東', type:'honor', color:'black', img:'mjphoto/1z.png' });
 TILE_DEFS.push({ suit:'wind', num:2, id:'south', label:'南', type:'honor', color:'black', img:'mjphoto/2z.png' });
 TILE_DEFS.push({ suit:'wind', num:3, id:'west',  label:'西', type:'honor', color:'black', img:'mjphoto/3z.png' });
 TILE_DEFS.push({ suit:'wind', num:4, id:'north', label:'北', type:'honor', color:'black', img:'mjphoto/4z.png' });
-// 三元牌 5z-7z（白發中）
 TILE_DEFS.push({ suit:'dragon', num:1, id:'chung', label:'中', type:'honor', color:'red',   img:'mjphoto/7z.png' });
 TILE_DEFS.push({ suit:'dragon', num:2, id:'fat',   label:'發', type:'honor', color:'green', img:'mjphoto/6z.png' });
 TILE_DEFS.push({ suit:'dragon', num:3, id:'bak',   label:'白', type:'honor', color:'blue',  img:'mjphoto/5z.png' });
@@ -475,11 +534,11 @@ const FAN_TABLE = [
   { id:'noMatchThreeClosed', name:'不搭暗三相逢', fan:70, cat:'大牌' },
   { id:'noMatchDragonOpen', name:'不搭明雜龍', fan:70, cat:'大牌' },
   { id:'noMatchDragonClosed', name:'不搭暗雜龍', fan:80, cat:'大牌' },
-  { id:'sixteenFly', name:'十六飛', fan:60, cat:'大牌' },
-  { id:'thirteenOrphan', name:'十三幺', fan:130, cat:'大牌' },
-  { id:'thirteenFly', name:'十三飛', fan:143, cat:'大牌' },
+  { id:'sixteenFly', name:'十六飛', fan:10, cat:'大牌' },
+  { id:'thirteenOrphan', name:'十三幺', fan:100, cat:'大牌' },
+  { id:'thirteenFly', name:'十三飛', fan:10, cat:'大牌' },
   { id:'luckyGulu', name:'嚦咕嚦咕', fan:50, cat:'大牌' },
-  { id:'eightFly', name:'八飛', fan:60, cat:'大牌' },
+  { id:'eightFly', name:'八飛', fan:10, cat:'大牌' },
   { id:'threePairChain', name:'三連對', fan:5, cat:'大牌' },
   { id:'fourPairChain', name:'四連對', fan:10, cat:'大牌' },
   { id:'fivePairChain', name:'五連對', fan:20, cat:'大牌' },
@@ -519,387 +578,17 @@ let kongSection = [];
 let historyData = [];
 let resultData = null;
 
-// 結算加番狀態
 let bonusState = {};
 let baseResultTotal = 0;
 let baseResultDetail = [];
 
-// 雙食嚦咕
 let bonusStateByVariant = null;
 let currentVariantIndex = 0;
 
-// 確認視窗暫存
 let cfRed = 0;
 let cfBlue = 0;
 let cfSelectedTile = null;
-
-/* ============================================================
-   AI 相機拍照識牌功能（OpenRouter 自動搜尋免費視覺模型 / 智譜 / Gemini）
-   ============================================================ */
-function openApiModal() {
-  document.getElementById('apiKeyInput').value = localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key') || '';
-  document.getElementById('aiFillMode').value = localStorage.getItem('mahjong_ai_fill_mode') || 'replace';
-  const savedModel = localStorage.getItem('mahjong_ai_provider_model') || 'openrouter:auto-free-vision';
-  const selectEl = document.getElementById('aiModelSelect');
-  if ([...selectEl.options].some(o => o.value === savedModel)) {
-    selectEl.value = savedModel;
-  } else {
-    selectEl.value = 'openrouter:auto-free-vision';
-  }
-  document.getElementById('apiModal').classList.add('show');
-}
-
-function closeApiModal() {
-  document.getElementById('apiModal').classList.remove('show');
-}
-
-function saveApiSettings() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  const mode = document.getElementById('aiFillMode').value;
-  let providerModel = document.getElementById('aiModelSelect').value;
-
-  if (key.startsWith('AIza')) {
-    providerModel = 'gemini:gemini-2.5-flash';
-  } else if (key.startsWith('sk-or-')) {
-    providerModel = 'openrouter:auto-free-vision';
-  }
-
-  localStorage.setItem('mahjong_ai_api_key', key);
-  localStorage.setItem('mahjong_zhipu_api_key', key);
-  localStorage.setItem('mahjong_ai_fill_mode', mode);
-  localStorage.setItem('mahjong_ai_provider_model', providerModel);
-  closeApiModal();
-  showToast('API 設定已儲存');
-}
-
-function triggerCamera() {
-  const apiKey = localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key');
-  if (!apiKey) {
-    showToast('請先設定 AI API Key');
-    openApiModal();
-    return;
-  }
-  const input = document.getElementById('cameraInput');
-  input.value = '';
-  input.click();
-}
-
-function compressImageToBase64(file, maxWidth = 1024, quality = 0.8) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let w = img.width;
-        let h = img.height;
-        if (w > maxWidth || h > maxWidth) {
-          if (w > h) {
-            h = Math.round((h * maxWidth) / w);
-            w = maxWidth;
-          } else {
-            w = Math.round((w * maxWidth) / h);
-            h = maxWidth;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        const rawBase64 = dataUrl.split(',')[1];
-        resolve({ dataUrl, rawBase64 });
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// 動態向 OpenRouter 查詢當下在線的所有免費視覺模型
-async function getOpenRouterFreeVisionModels() {
-  const fallbackList = [
-    'google/gemma-3-27b-it:free',
-    'google/gemma-3-12b-it:free',
-    'google/gemma-3-4b-it:free',
-    'qwen/qwen2.5-vl-72b-instruct:free',
-    'qwen/qwen-2.5-vl-7b-instruct:free',
-    'meta-llama/llama-3.2-11b-vision-instruct:free',
-    'mistralai/mistral-small-3.1-24b-instruct:free'
-  ];
-  try {
-    const res = await fetch('https://openrouter.ai/api/v1/models');
-    if (!res.ok) return fallbackList;
-    const data = await res.json();
-    const models = (data.data || []).filter(m => {
-      const isFree = m.id.endsWith(':free') ||
-        (m.pricing && parseFloat(m.pricing.prompt) === 0 && parseFloat(m.pricing.completion) === 0);
-      const hasImage = (Array.isArray(m.architecture?.input_modalities) && m.architecture.input_modalities.includes('image')) ||
-        (typeof m.architecture?.modality === 'string' && m.architecture.modality.includes('image'));
-      return isFree && hasImage;
-    }).map(m => m.id);
-
-    if (models.length === 0) return fallbackList;
-
-    // 優先排序對麻雀與中文字辨識度高的模型
-    models.sort((a, b) => {
-      const score = (id) => {
-        if (id.includes('qwen')) return 50;
-        if (id.includes('gemini')) return 45;
-        if (id.includes('gemma-3-27b')) return 40;
-        if (id.includes('gemma')) return 35;
-        if (id.includes('mistral')) return 30;
-        if (id.includes('llama')) return 25;
-        return 10;
-      };
-      return score(b) - score(a);
-    });
-
-    return models;
-  } catch (e) {
-    return fallbackList;
-  }
-}
-
-async function handleImageUpload(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) return;
-
-  const apiKey = (localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key') || '').trim();
-  const fillMode = localStorage.getItem('mahjong_ai_fill_mode') || 'replace';
-  let providerModel = localStorage.getItem('mahjong_ai_provider_model') || 'openrouter:auto-free-vision';
-
-  if (!apiKey) {
-    openApiModal();
-    return;
-  }
-
-  if (apiKey.startsWith('AIza')) providerModel = 'gemini:gemini-2.5-flash';
-  else if (apiKey.startsWith('sk-or-')) providerModel = 'openrouter:auto-free-vision';
-
-  const [provider, modelName] = providerModel.includes(':')
-    ? [providerModel.split(':')[0], providerModel.split(':').slice(1).join(':')]
-    : ['zhipu', providerModel];
-
-  const loadingEl = document.getElementById('aiLoadingOverlay');
-  const loadingMsg = document.getElementById('aiLoadingMsg');
-  loadingEl.classList.add('show');
-  loadingMsg.textContent = '正在壓縮圖片並連線至 AI 伺服器...';
-
-  try {
-    const { dataUrl, rawBase64 } = await compressImageToBase64(file);
-
-    const promptText = `你是一個專業的港式台灣麻雀（17張牌）視覺辨識系統。請仔細辨識照片中的所有麻雀牌，並轉換為指定的代碼。
-
-【麻雀牌代碼對照表】
-- 萬子 (一萬至九萬): "wan1", "wan2", "wan3", "wan4", "wan5", "wan6", "wan7", "wan8", "wan9"
-- 筒子/餅子 (一筒至九筒): "tong1", "tong2", "tong3", "tong4", "tong5", "tong6", "tong7", "tong8", "tong9"
-- 索子/條子 (一索為鳥/孔雀圖案，二索至九索): "so1", "so2", "so3", "so4", "so5", "so6", "so7", "so8", "so9"
-- 風牌 (東南西北): "east", "south", "west", "north"
-- 三元牌 (紅中、發財、白板/藍框白板): "chung", "fat", "bak"
-- 花牌:
-  - 紅花（紅色字/圖案的花牌，如春夏秋冬或1-4紅字花）請統計張數於 "redFlowers" (0~4)
-  - 藍花/綠花（藍色或綠色字/圖案的花牌，如梅蘭菊竹或1-4藍字花）請統計張數於 "blueFlowers" (0~4)
-
-【分區規則】
-1. 若照片中明顯有上下兩排或分開擺放：
-   - 靠自己/下方的一排（或立起的牌）放入 "closed"（暗手牌陣列，每張牌獨立列出，例如兩張東風寫 ["east", "east"]）。
-   - 靠上方/外推攤開的副露（已吃、碰的三張一組）放入 "open"（明手牌陣列，每張牌獨立列出）。
-   - 若有 4 張相同且聚在一起的槓牌，放入 "kong" 陣列，格式為 {"id": "牌代碼", "type": "open" 或 "closed"}（若其中有蓋住的牌則為 "closed"，全攤開為 "open"；注意：已放入 kong 的牌不要重複放入 closed 或 open）。
-2. 若所有非花牌都排成同一排、沒有明顯分區，請全部放入 "closed" 陣列。
-
-請嚴格只回傳純 JSON 格式（不要加任何其他解說文字），結構如下：
-{
-  "closed": ["wan1", "wan2", "wan3"],
-  "open": [],
-  "kong": [],
-  "redFlowers": 0,
-  "blueFlowers": 0
-}`;
-
-    let rawText = '';
-
-    if (provider === 'gemini') {
-      loadingMsg.textContent = '正在使用 Google Gemini 辨識牌型...';
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const response = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        referrerPolicy: 'no-referrer',
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: promptText },
-              { inline_data: { mime_type: 'image/jpeg', data: rawBase64 } }
-            ]
-          }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
-        })
-      });
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        throw new Error(`Google Gemini 請求失敗 (HTTP ${response.status}) ${errText.slice(0, 120)}`);
-      }
-      const resJson = await response.json();
-      rawText = resJson.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    } else if (provider === 'openrouter') {
-      loadingMsg.textContent = '正在取得 OpenRouter 最新可用免費模型...';
-      const candidateModels = await getOpenRouterFreeVisionModels();
-      let lastError = '';
-
-      // 自動依序嘗試前 5 個在線的免費視覺模型
-      for (let i = 0; i < Math.min(5, candidateModels.length); i++) {
-        const tryModel = candidateModels[i];
-        loadingMsg.textContent = `正在使用免費模型 (${i+1})：${tryModel.split('/')[1] || tryModel}...`;
-
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: tryModel,
-            messages: [{
-              role: 'user',
-              content: [
-                { type: 'text', text: promptText },
-                { type: 'image_url', image_url: { url: dataUrl } }
-              ]
-            }],
-            temperature: 0.1
-          })
-        });
-
-        if (response.ok) {
-          const resJson = await response.json();
-          const content = resJson.choices?.[0]?.message?.content;
-          if (content) {
-            rawText = content;
-            break;
-          }
-        } else {
-          const errText = await response.text().catch(() => '');
-          lastError = `(HTTP ${response.status}) ${errText.slice(0, 140)}`;
-        }
-      }
-
-      if (!rawText) {
-        throw new Error(`OpenRouter 所有免費視覺模型皆無法呼叫：${lastError}\n\n⚠️【關鍵解決步驟】：\n請打開 https://openrouter.ai/settings/privacy\n將「Enable free endpoints that may train on inputs」打開！否則 OpenRouter 會封鎖所有 :free 免費模型並回傳 404 No endpoints found。`);
-      }
-
-    } else {
-      // 智譜 AI (BigModel glm-4v-flash)
-      loadingMsg.textContent = '正在使用智譜 GLM-4V-Flash 辨識牌型...';
-      const zhipuUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-      const response = await fetch(zhipuUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        referrerPolicy: 'no-referrer',
-        body: JSON.stringify({
-          model: modelName || 'glm-4v-flash',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'image_url', image_url: { url: rawBase64 } },
-                { type: 'text', text: promptText }
-              ]
-            }
-          ],
-          temperature: 0.1
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        throw new Error(`智譜 API 請求失敗 (HTTP ${response.status}) ${errText.slice(0, 120)}`);
-      }
-      const resJson = await response.json();
-      rawText = resJson.choices?.[0]?.message?.content || '';
-    }
-
-    if (!rawText) throw new Error('AI 未回傳任何辨識結果');
-
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('無法解析 AI 回傳的牌型格式：' + rawText.slice(0, 80));
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    applyAiRecognizedTiles(parsed, fillMode);
-  } catch (err) {
-    console.error(err);
-    alert('AI 識牌失敗：\n' + err.message);
-  } finally {
-    loadingEl.classList.remove('show');
-  }
-}
-
-function applyAiRecognizedTiles(data, fillMode) {
-  const closedArr = Array.isArray(data.closed) ? data.closed.filter(id => TILE_MAP[id]) : [];
-  const openArr = Array.isArray(data.open) ? data.open.filter(id => TILE_MAP[id]) : [];
-  const kongArr = Array.isArray(data.kong) ? data.kong.filter(k => k && TILE_MAP[k.id]) : [];
-
-  if (fillMode === 'append') {
-    const combined = [...closedArr, ...openArr];
-    let addedCount = 0;
-    combined.forEach(id => {
-      const allTiles = getAllSelectedTilesForWall();
-      if (allTiles.filter(x => x === id).length < 4) {
-        if (targetSection === 'open') openSection.push(id);
-        else if (targetSection === 'kong') kongSection.push({ id, type: currentKongType });
-        else closedSection.push(id);
-        addedCount++;
-      }
-    });
-    refreshUI();
-    showToast(`已加入 ${addedCount} 張牌至當前分區`);
-    return;
-  }
-
-  openSection = [];
-  closedSection = [];
-  kongSection = [];
-
-  const usedCount = {};
-  const canUse = (id, need) => ((usedCount[id] || 0) + need <= 4);
-  const markUsed = (id, need) => { usedCount[id] = (usedCount[id] || 0) + need; };
-
-  kongArr.forEach(k => {
-    if (canUse(k.id, 4)) {
-      kongSection.push({ id: k.id, type: k.type === 'open' ? 'open' : 'closed' });
-      markUsed(k.id, 4);
-    }
-  });
-
-  openArr.forEach(id => {
-    if (canUse(id, 1)) {
-      openSection.push(id);
-      markUsed(id, 1);
-    }
-  });
-
-  closedArr.forEach(id => {
-    if (canUse(id, 1)) {
-      closedSection.push(id);
-      markUsed(id, 1);
-    }
-  });
-
-  const rFlowers = Math.min(4, Math.max(0, parseInt(data.redFlowers, 10) || 0));
-  const bFlowers = Math.min(4, Math.max(0, parseInt(data.blueFlowers, 10) || 0));
-  redFlowerCount = rFlowers;
-  blueFlowerCount = (rFlowers + bFlowers > 8) ? (8 - rFlowers) : bFlowers;
-
-  refreshUI();
-  const totalRecognized = closedSection.length + openSection.length + (kongSection.length * 3);
-  showToast(`識牌完成！共計 ${totalRecognized} 張手牌（花:${redFlowerCount + blueFlowerCount}）`);
-}
+let cfBonusState = {};
 
 function showConfirm(title, msg, onYes) {
   const overlay = document.getElementById('confirmOverlay');
@@ -1084,7 +773,211 @@ function switchTab(tab, el) {
 }
 
 /* ============================================================
-   確認視窗：花牌 + 食胡牌
+   AI 識別牌模組
+   ============================================================ */
+const AI_MODEL = 'nvidia/nemotron-3.5-super-vl:free'; 
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+let aiRecognizedTiles = [];
+
+function getApiKey() {
+  let key = localStorage.getItem('openrouter_api_key');
+  if (!key) {
+    key = prompt('請輸入 OpenRouter API Key（免費申請：https://openrouter.ai/keys）\n僅儲存在你這部裝置的瀏覽器，不會上傳到任何伺服器。');
+    if (key) localStorage.setItem('openrouter_api_key', key.trim());
+  }
+  return key;
+}
+
+function openAiPanel() {
+  resetAiPanel();
+  document.getElementById('aiPanel').classList.add('show');
+}
+
+function closeAiPanel() {
+  document.getElementById('aiPanel').classList.remove('show');
+}
+
+function resetAiPanel() {
+  aiRecognizedTiles = [];
+  document.getElementById('aiFileInput').value = '';
+  document.getElementById('aiPreview').innerHTML = '';
+  document.getElementById('aiStatus').textContent = '';
+  document.getElementById('aiStatus').className = 'ai-status';
+  document.getElementById('aiResult').textContent = '';
+  document.getElementById('aiResult').classList.remove('show');
+  document.getElementById('aiActions').style.display = 'none';
+}
+
+async function handleAiImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('aiStatus');
+  statusEl.className = 'ai-status';
+  statusEl.textContent = '圖片處理中...';
+  document.getElementById('aiActions').style.display = 'none';
+  document.getElementById('aiResult').classList.remove('show');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    document.getElementById('aiPreview').innerHTML = `<img src="${e.target.result}" alt="預覽">`;
+
+    try {
+      const compressedDataUrl = await compressImage(file, 1024, 0.8);
+      statusEl.textContent = 'AI 辨識中，請稍候...';
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        statusEl.className = 'ai-status error';
+        statusEl.textContent = '未提供 API Key，無法辨識';
+        return;
+      }
+
+      const result = await callOpenRouterVision(compressedDataUrl, apiKey);
+      aiRecognizedTiles = result.tiles;
+
+      if (aiRecognizedTiles.length === 0) {
+        statusEl.className = 'ai-status error';
+        statusEl.textContent = 'AI 未能辨識到任何麻將牌，請嘗試更清晰的圖片';
+        document.getElementById('aiResult').textContent = result.raw;
+        document.getElementById('aiResult').classList.add('show');
+        return;
+      }
+
+      statusEl.textContent = `✅ 辨識完成，共 ${aiRecognizedTiles.length} 張牌`;
+      document.getElementById('aiResult').innerHTML = `<span style="color:#ffd200;font-weight:bold;">辨識結果：</span><br>` + 
+        aiRecognizedTiles.map(t => TILE_MAP[t.id]?.label || t.id).join(' ');
+      document.getElementById('aiResult').classList.add('show');
+      document.getElementById('aiActions').style.display = 'flex';
+
+    } catch (err) {
+      console.error(err);
+      statusEl.className = 'ai-status error';
+      statusEl.textContent = '辨識失敗：' + err.message;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function compressImage(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxSize || height > maxSize) {
+        const ratio = Math.min(maxSize / width, maxSize / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function callOpenRouterVision(base64DataUrl, apiKey) {
+  const prompt = `你是一個麻將牌辨識專家。請仔細辨識圖片中所有可見的麻將牌，並以嚴格的 JSON 格式回傳，不要加入任何其他文字或 markdown 標記。
+
+回傳格式範例：
+{"tiles":[{"suit":"wan","num":1},{"suit":"tong","num":5},{"suit":"so","num":9},{"suit":"wind","num":1},{"suit":"dragon","num":1}]}
+
+規則：
+- suit 只能是 wan（萬）、tong（筒）、so（索）、wind（風）、dragon（三元牌）
+- 風牌 num：1=東、2=南、3=西、4=北
+- 三元牌 num：1=中、2=發、3=白
+- 數字牌 num 為 1~9
+- 只回傳圖片中清楚可見的牌，不要猜測
+- 如果完全看不到麻將牌，回傳 {"tiles":[]}`;
+
+  const response = await fetch(OPENROUTER_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + apiKey,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Mahjong Counter AI'
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: base64DataUrl } }
+        ]
+      }],
+      temperature: 0.1,
+      max_tokens: 512
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API 錯誤 ${response.status}：${errText.slice(0, 200)}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content || '';
+
+  // 嘗試從回傳內容萃取 JSON
+  const jsonMatch = content.match(/\{[\s\S]*"tiles"[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('AI 回傳格式無法解析：' + content.slice(0, 300));
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    throw new Error('JSON 解析失敗：' + jsonMatch[0].slice(0, 200));
+  }
+
+  const tiles = (parsed.tiles || []).map(item => {
+    const suit = String(item.suit || '').toLowerCase();
+    const num = parseInt(item.num, 10);
+
+    let id = null;
+    if (suit === 'wan' && num >= 1 && num <= 9) id = `wan${num}`;
+    else if (suit === 'tong' && num >= 1 && num <= 9) id = `tong${num}`;
+    else if (suit === 'so' && num >= 1 && num <= 9) id = `so${num}`;
+    else if (suit === 'wind' && num >= 1 && num <= 4) {
+      id = ['east', 'south', 'west', 'north'][num - 1];
+    } else if (suit === 'dragon' && num >= 1 && num <= 3) {
+      id = ['chung', 'fat', 'bak'][num - 1];
+    }
+
+    return id ? { id, section: 'closed' } : null;
+  }).filter(Boolean);
+
+  return { tiles, raw: content };
+}
+
+function applyAiResult() {
+  if (aiRecognizedTiles.length === 0) return;
+
+  let addedCount = 0;
+  aiRecognizedTiles.forEach(t => {
+    const allTiles = getAllSelectedTilesForWall();
+    if (allTiles.filter(x => x === t.id).length >= 4) return; // 每張牌上限 4 隻
+    closedSection.push(t.id);
+    addedCount++;
+  });
+
+  refreshUI();
+  closeAiPanel();
+  showToast(`已加入 ${addedCount} 張牌到暗手牌區`);
+}
+
+/* ============================================================
+   確認視窗：花牌 + 加番 + 食胡牌
    ============================================================ */
 function openCalcConfirm() {
   const totalTilesCount = openSection.length + closedSection.length + (kongSection.length * 3);
@@ -1096,9 +989,11 @@ function openCalcConfirm() {
   cfRed = redFlowerCount;
   cfBlue = blueFlowerCount;
   cfSelectedTile = null;
+  cfBonusState = {};
 
   renderCfFlowerBtns();
   renderCfTiles();
+  updateCfBonusButtons();
 
   document.getElementById('calcConfirmOverlay').classList.add('show');
 }
@@ -1158,6 +1053,26 @@ function selectCfTile(sec, index, id) {
   renderCfTiles();
 }
 
+function cfToggleBonus(key, fan) {
+  if (cfBonusState[key] !== undefined) {
+    delete cfBonusState[key];
+  } else {
+    cfBonusState[key] = fan;
+  }
+  if (key === 'selfDraw') {
+    window.isSelfDraw = cfBonusState.selfDraw !== undefined;
+  }
+  updateCfBonusButtons();
+}
+
+function updateCfBonusButtons() {
+  document.querySelectorAll('.confirm-bonus .bonus-btn').forEach(btn => {
+    const key = btn.dataset.bonus;
+    if (cfBonusState[key] !== undefined) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+}
+
 function confirmCalc() {
   if (!cfSelectedTile) {
     showToast('請先點選食胡嗰張牌');
@@ -1166,6 +1081,8 @@ function confirmCalc() {
   redFlowerCount = cfRed;
   blueFlowerCount = cfBlue;
   window.selectedWinTile = { ...cfSelectedTile };
+  window.isSelfDraw = cfBonusState.selfDraw !== undefined;
+
   closeCalcConfirm();
   calculateSafe();
 }
@@ -1185,6 +1102,11 @@ function isValidWinningHand(counts) {
 function detectWinPatterns(hand, winTile) {
   if (!winTile) return { items: [], total: 0 };
   const counts = { ...hand.counts };
+
+  if (checkSixteenNoMatch(counts) || checkThirteenOrphan(counts) || checkLuckyGulu(counts)) {
+    return { items: [], total: 0 };
+  }
+
   const winId = winTile.id;
   const winCount = counts[winId] || 0;
   if (winCount <= 0) return { items: [], total: 0 };
@@ -1383,9 +1305,12 @@ function evaluateThirteenOrphan(counts, hand) {
   if (!result) return null;
 
   const detail = [];
-  let totalFan = 130;
+  let totalFan = 100;
 
-  detail.push({ id: 'thirteenOrphan', name: '十三幺', fan: 130, cat: '大牌', detail: '齊集 13 種么九字牌 + 1 對眼 + 1 坎' });
+  detail.push({ id: 'thirteenOrphan', name: '十三幺', fan: 100, cat: '大牌', detail: '齊集 13 種么九字牌 + 1 對眼 + 1 坎' });
+
+  totalFan += 10;
+  detail.push({ id: 'thirteenFly', name: '十三飛', fan: 10, cat: '大牌', detail: '十三幺 + 十三飛' });
 
   const { winds, dragons, redFlowers, blueFlowers } = hand;
   if (isMissingFive(counts)) {
@@ -1486,6 +1411,9 @@ function evaluateSixteenNoMatch(counts, hand) {
   let totalFan = 50;
 
   detail.push({ id: 'sixteenNoMatch', name: '十六不搭', fan: 50, cat: '大牌', detail: '7 種字牌 + 三門各 3 張不搭數牌 + 1 對眼' });
+
+  totalFan += 10;
+  detail.push({ id: 'sixteenFly', name: '十六飛', fan: 10, cat: '大牌', detail: '十六不搭 + 十六飛' });
 
   if (isMissingFive(counts)) {
     totalFan += 5;
@@ -1636,6 +1564,9 @@ function evaluateLuckyGulu(counts, hand) {
     cat: '大牌',
     detail: guluMatch.oddCount === 3 ? '七對一刻（八對半，不計門清）' : '八對一單張（八對半，不計門清）'
   });
+
+  totalFan += 10;
+  detail.push({ id: 'eightFly', name: '八飛', fan: 10, cat: '大牌', detail: '嚦咕嚦咕 + 八飛' });
 
   const chainResults = detectLuckyGuluPairChains(counts);
   chainResults.forEach(r => {
@@ -1877,7 +1808,7 @@ function getSequenceMeldCounts(melds, pair) {
     const id1 = `${suit}${start}`;
     const id2 = `${suit}${start + 1}`;
     const id3 = `${suit}${start + 2}`;
-    if ((remClosed[id1] || 0) > 0 && (remClosed[id2] || 0) > 0 && (remClosed[id3] || 0) > 0) {
+    if (!m.isWinMeld && (remClosed[id1] || 0) > 0 && (remClosed[id2] || 0) > 0 && (remClosed[id3] || 0) > 0) {
       seqCopyCount[key].closedCopies++;
       remClosed[id1]--;
       remClosed[id2]--;
@@ -1903,6 +1834,9 @@ function detectThreeColorStep(melds, pair) {
     ['wan', 'so', 'tong'],
     ['so', 'tong', 'wan'],
     ['tong', 'wan', 'so'],
+    ['wan', 'tong', 'so'],
+    ['tong', 'so', 'wan'],
+    ['so', 'wan', 'tong'],
   ];
 
   const calcMatchCopies = (infos) => {
@@ -2587,15 +2521,41 @@ function detectPairHighFromMelds(melds) {
   return results;
 }
 
-function detectMixedWithXFromMelds(melds, tiles) {
-  if (melds.length === 0) return null;
-  const meldNumSets = melds.map(m => new Set(m.nums));
-  let intersection = new Set(meldNumSets[0]);
-  for (let i = 1; i < meldNumSets.length; i++) intersection = new Set([...intersection].filter(x => meldNumSets[i].has(x)));
-  const xList = [...intersection].sort((a,b)=>a-b);
-  if (xList.length === 0) return null;
-  const fan = xList.length * 30;
-  return { id: 'mixedWithX', name: `混帶X（${xList.map(n=>`混${n}`).join('、')}）`, fan: fan, cat: '大牌', detail: `${xList.length} 個數字 × 30 番 = ${fan} 番` };
+function detectMixedWithXFromMelds(melds, tiles, hand, pair) {
+  if (!hand) return [];
+  const hasWord = hand.winds.length > 0 || hand.dragons.length > 0;
+  const results = [];
+
+  if (!pair) return [];
+
+  for (let x = 1; x <= 9; x++) {
+    if (pair.suit !== 'honor' && pair.num !== x) continue;
+
+    let allMatch = true;
+
+    for (const m of melds) {
+      if (m.suit === 'honor') continue;
+      if (!m.nums.includes(x)) { allMatch = false; break; }
+    }
+
+    if (!allMatch) continue;
+
+    const fan = hasWord ? 30 : 80;
+    const name = hasWord ? `混帶X（混${x}）` : `全帶X（全${x}）`;
+    const detail = hasWord
+      ? `每組數字面子及將眼都含 ${x}（字牌面子／字牌眼豁免），且有字牌`
+      : `每組數字面子及將眼都含 ${x}（無字牌）`;
+
+    results.push({
+      id: hasWord ? 'mixedWithX' : 'allWithX',
+      name,
+      fan,
+      cat: '大牌',
+      detail
+    });
+  }
+
+  return results;
 }
 
 function detectMixedTerminalFromMelds(melds, hand) {
@@ -2628,6 +2588,22 @@ function isAllTerminal(suits, winds, dragons) {
 
 function evaluateDecomposition(decomp, hand) {
   const { melds, pair } = decomp;
+
+  const winTileId = window.selectedWinTile ? window.selectedWinTile.id : null;
+  if (!window.isSelfDraw && winTileId) {
+    let marked = false;
+    for (const m of melds) {
+      if (marked) break;
+      if (m.ids && m.ids.includes(winTileId)) {
+        m.isWinMeld = true;
+        marked = true;
+      } else if (m.type === '刻子' && m.id === winTileId) {
+        m.isWinMeld = true;
+        marked = true;
+      }
+    }
+  }
+
   const matchedIds = [];
   const dynamicDetails = [];
   const { suits, winds, dragons, redFlowers, blueFlowers, counts } = hand;
@@ -2662,7 +2638,7 @@ function evaluateDecomposition(decomp, hand) {
   closedSection.forEach(id => closedCounts[id] = (closedCounts[id] || 0) + 1);
 
   melds.forEach(m => {
-    if (m.type === '刻子') {
+    if (m.type === '刻子' && !m.isWinMeld) {
       if (m.id && closedCounts[m.id] >= 3) {
         closedTripletsCount++;
         closedCounts[m.id] -= 3;
@@ -2828,8 +2804,9 @@ function evaluateDecomposition(decomp, hand) {
   const mixedTerminalResult = !isWord ? detectMixedTerminalFromMelds(melds, hand) : null;
   if (mixedTerminalResult) dynamicDetails.push(mixedTerminalResult);
 
-  const mixedXResult = !isWord ? detectMixedWithXFromMelds(melds, allTiles) : null;
-  if (mixedXResult) dynamicDetails.push(mixedXResult);
+  if (!isWord) {
+    detectMixedWithXFromMelds(melds, allTiles, hand, pair).forEach(r => dynamicDetails.push(r));
+  }
 
   const uniqueMatchedIds = [...new Set(matchedIds)];
   let total = 0;
@@ -3074,8 +3051,13 @@ function toggleBonus(key, fan) {
     if (bonusState.ding) {
       delete bonusState.ding;
     } else {
-      const isClosed = hasBaseFan('closedHand') || hasBaseFan('closedSelfDraw');
-      bonusState.ding = isClosed ? 15 : 5;
+      const isMustClosed = hasBaseFan('sixteenNoMatch') || hasBaseFan('thirteenOrphan') || hasBaseFan('luckyGulu');
+      if (isMustClosed) {
+        bonusState.ding = 5;
+      } else {
+        const isClosed = hasBaseFan('closedHand') || hasBaseFan('closedSelfDraw');
+        bonusState.ding = isClosed ? 15 : 5;
+      }
     }
     updateBonusButtons();
     recalcBonus();
@@ -3208,78 +3190,6 @@ function renderResultBody(total, detail, variants, activeIdx) {
     winTileHTML = `<div style="text-align:center;margin-bottom:10px;font-size:12px;color:#aaa;">食胡牌：<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:46px;background:#f5f5f0;border-radius:5px;border:2px solid #ffd200;vertical-align:middle;">${inner}</span></div>`;
   }
 
-  const bonusHTML = `
-    <div class="bonus-section">
-      <div class="bonus-title">➕ 加番按鈕（點擊切換）</div>
-
-      <div class="bonus-group">
-        <div class="bonus-group-label">基本狀態</div>
-        <div class="bonus-btns">
-          <button class="bonus-btn" data-bonus="selfDraw" onclick="toggleBonus('selfDraw', 1)">自摸</button>
-          <button class="bonus-btn" data-bonus="ding" onclick="toggleBonus('ding', 5)">叮</button>
-          <button class="bonus-btn" data-bonus="dingJik" onclick="toggleBonus('dingJik', 5)">叮即</button>
-          <button class="bonus-btn" data-bonus="robKong" onclick="toggleBonus('robKong', 5)">搶槓</button>
-          <button class="bonus-btn" data-bonus="doubleWin" onclick="toggleBonus('doubleWin', 5)">雙響</button>
-          <button class="bonus-btn" data-bonus="tripleWin" onclick="toggleBonus('tripleWin', 10)">三響</button>
-        </div>
-      </div>
-
-      <div class="bonus-group">
-        <div class="bonus-group-label">特別（飛 / 海底 / 河底）</div>
-        <div class="bonus-btns">
-          <button class="bonus-btn" data-bonus="fly8" onclick="toggleBonus('fly8', 10)">8飛</button>
-          <button class="bonus-btn" data-bonus="fly13" onclick="toggleBonus('fly13', 10)">13飛</button>
-          <button class="bonus-btn" data-bonus="fly16" onclick="toggleBonus('fly16', 10)">16飛</button>
-          <button class="bonus-btn" data-bonus="seaFish" onclick="toggleBonus('seaFish', 5)">海底撈月</button>
-          <button class="bonus-btn" data-bonus="riverFish" onclick="toggleBonus('riverFish', 3)">河底撈月</button>
-        </div>
-      </div>
-
-      <div class="bonus-group">
-        <div class="bonus-group-label">花摸</div>
-        <div class="bonus-btns">
-          <button class="bonus-btn" data-bonus="flower1" onclick="toggleBonus('flower1', 1)">花摸*1</button>
-          <button class="bonus-btn" data-bonus="flower2" onclick="toggleBonus('flower2', 5)">花摸*2</button>
-          <button class="bonus-btn" data-bonus="flower3" onclick="toggleBonus('flower3', 10)">花摸*3</button>
-          <button class="bonus-btn" data-bonus="flower4" onclick="toggleBonus('flower4', 20)">花摸*4</button>
-          <button class="bonus-btn" data-bonus="flower5" onclick="toggleBonus('flower5', 40)">花摸*5</button>
-          <button class="bonus-btn" data-bonus="flower6" onclick="toggleBonus('flower6', 70)">花摸*6</button>
-          <button class="bonus-btn" data-bonus="flower7" onclick="toggleBonus('flower7', 100)">花摸*7</button>
-          <button class="bonus-btn" data-bonus="flower8" onclick="toggleBonus('flower8', 140)">花摸*8</button>
-        </div>
-      </div>
-
-      <div class="bonus-group">
-        <div class="bonus-group-label">槓摸</div>
-        <div class="bonus-btns">
-          <button class="bonus-btn" data-bonus="kong1" onclick="toggleBonus('kong1', 1)">槓摸*1</button>
-          <button class="bonus-btn" data-bonus="kong2" onclick="toggleBonus('kong2', 5)">槓摸*2</button>
-          <button class="bonus-btn" data-bonus="kong3" onclick="toggleBonus('kong3', 10)">槓摸*3</button>
-          <button class="bonus-btn" data-bonus="kong4" onclick="toggleBonus('kong4', 25)">槓摸*4</button>
-          <button class="bonus-btn" data-bonus="kong5" onclick="toggleBonus('kong5', 50)">槓摸*5</button>
-        </div>
-      </div>
-
-      <div class="bonus-group">
-        <div class="bonus-group-label">花槓自摸</div>
-        <div class="bonus-btns">
-          <button class="bonus-btn" data-bonus="flowerKong1" onclick="toggleBonus('flowerKong1', 8)">花槓自摸</button>
-          <button class="bonus-btn" data-bonus="flowerKong3" onclick="toggleBonus('flowerKong3', 15)">花槓自摸*3</button>
-          <button class="bonus-btn" data-bonus="flowerKong4" onclick="toggleBonus('flowerKong4', 25)">花槓自摸*4</button>
-          <button class="bonus-btn" data-bonus="flowerKong5" onclick="toggleBonus('flowerKong5', 50)">花槓自摸*5</button>
-          <button class="bonus-btn" data-bonus="flowerKong6" onclick="toggleBonus('flowerKong6', 80)">花槓自摸*6</button>
-          <button class="bonus-btn" data-bonus="flowerKong7" onclick="toggleBonus('flowerKong7', 120)">花槓自摸*7</button>
-        </div>
-      </div>
-
-      <div class="bonus-hint" style="margin-top:6px;">
-        ※ 自摸額外規則自動處理：門清自摸 +2、自摸雞糊轉鴨糊、門清對對胡自摸轉坎坎糊、自摸全求人轉半求人，以上情況自摸不再 +1。<br>
-        ※ 叮額外規則：門清叮額外 +10（即門清時按叮，叮由 +5 變 +15）。<br>
-        ※ 對碰／獨獨／假獨：由程式根據食胡牌自動判斷（對碰 +2、獨獨 +2、假獨 +1），不再手動按。
-      </div>
-    </div>
-  `;
-
   body.innerHTML = `
     ${headerHTML}
     ${winTileHTML}
@@ -3294,24 +3204,28 @@ function renderResultBody(total, detail, variants, activeIdx) {
         </div>
       `).join('')}
     `).join('')}
-    ${bonusHTML}
     <div class="result-note">
       ※ 將眼（2/5/8）僅限數字牌（風字眼不計）<br>
       ※ 全求人（15番）：全部吃、碰或明槓（無暗槓），暗手牌只有 2 張（單釣將眼）<br>
       ※ 槓牌自動整合至17張牌型計算中，不再重複獨立計算「槓摸」番數<br>
-      ※ 三色/同色步步高、四步高、登天 分明暗、按分支點條數計算、取最高層級<br>
+      ※ 三色/同色步步高、四步高、登天 分明暗、按分支點條數計算、取最高層級；三色已支援全部 6 種花色排列<br>
       ※ 雜連刻：三雜連刻(10番)、四雜連刻(20番)、五雜連刻(40番)；相鄰刻子不得同色，且必須包含三雜連刻（萬筒索齊集）<br>
       ※ 清龍 / 雜龍 / 老少 可複式；登天唔計平糊<br>
       ※ 三相逢：採複式相乘計算（例如 2索×2萬×1筒 = 4組）<br>
       ※ 全姊妹（30番）：5組順子為 A組×2 + B組×3，達成時不計平糊及姊妹<br>
-      ※ 嚦咕嚦咕（50番）：不計門清；七對一刻或八對半；連對只計每款剛好 2 隻的對子（3 隻不計、4 隻算 2 對），將眼（2/5/8）同步只計每款剛好 2 隻的對子；並計算五門齊/七門齊（10/15 番）及小三元(15)/小三風(10)/小四喜(30)（每款齊 2 隻即可，番數對半）<br>
+      ※ 嚦咕嚦咕（50番）：不計門清；七對一刻或八對半；連對只計每款剛好 2 隻的對子（3 隻不計、4 隻算 2 對），將眼（2/5/8）同步只計每款剛好 2 隻的對子；並計算五門齊/七門齊（10/15 番）及小三元(15)/小三風(10)/小四喜(30)（每款齊 2 隻即可，番數對半）；另加八飛(10番)，不計對碰／獨獨／假獨<br>
       ※ 雙食嚦咕：若同時組成一般牌型及嚦咕，兩副牌分別計番，顯示【X+Y】，點擊數字可切換查看該副牌番數；花／無花／無字／無字花只由第一副牌計算（第二副一律不計）<br>
       ※ 雞糊（30番）：必須恰好 1 隻花且全牌無任何其他番數，不計花2番直接計雞糊30番<br>
       ※ 五門齊：不分大小一律 10 番；七門齊：不分大小一律 15 番（嚦咕嚕咕下亦計算）<br>
       ※ 缺一門（5番）一定冇字（有風牌或三元牌即不計）<br>
       ※ 字牌：大三元(40)、小三元(20)、大四喜(100)、小四喜(60)、大三風(30)、小三風(15)、字一色(150，不計全帶幺、對對胡、缺五)<br>
       ※ 字牌刻子每組 +2 番（自動計算風牌及三元牌刻子）<br>
-      ※ 對碰／獨獨／假獨：由程式根據食胡牌自動判斷（對碰 +2、獨獨 +2、假獨 +1），不再手動按。
+      ※ 十六不搭：計十六不搭(50) + 十六飛(10)，不計對碰／獨獨／假獨<br>
+      ※ 十三幺：計十三幺(100) + 十三飛(10)，不計對碰／獨獨／假獨<br>
+      ※ 混帶X／全帶X：將眼可字可數；數字眼須等於X，字牌眼豁免；數字面子須含X，字牌面子豁免；有字→混帶X(30/個)，無字→全帶X(80/個)；多個X分別計算<br>
+      ※ 對碰／獨獨／假獨：由程式根據食胡牌自動判斷（對碰 +2、獨獨 +2、假獨 +1），不再手動按。<br>
+      ※ 食胡牌所在面子：非自摸時視為「明」（影響暗坎、暗龍、暗三相逢、步步高暗條數），自摸時視為「暗」；不影響門清與門清叮 +10。<br>
+      ※ 叮額外規則：一般門清牌型門清叮 +10；十六不搭／十三幺／嚦咕嚦咕等必須門清牌型門清叮只 +5。
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button onclick="saveResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 儲存本局</button>
@@ -3319,18 +3233,11 @@ function renderResultBody(total, detail, variants, activeIdx) {
     </div>
   `;
 
-  updateBonusButtons();
-  setTimeout(() => {
-    let bonusInfo = document.getElementById('bonusInfo');
-    if (!bonusInfo) {
-      bonusInfo = document.createElement('div');
-      bonusInfo.id = 'bonusInfo';
-      bonusInfo.style.cssText = 'text-align:center;font-size:12px;color:#ffd200;margin-top:8px;';
-      const bonusSection = document.querySelector('.bonus-section');
-      if (bonusSection) bonusSection.appendChild(bonusInfo);
-    }
-    bonusInfo.textContent = `目前加番：+0（基礎 ${baseResultTotal}）`;
-  }, 0);
+  if (cfBonusState && Object.keys(cfBonusState).length > 0) {
+    bonusState = { ...cfBonusState };
+    recalcBonus();
+    updateBonusButtons();
+  }
 }
 
 function closeResult() { document.getElementById('resultPanel').classList.remove('show'); }
