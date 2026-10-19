@@ -297,24 +297,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
 </div>
 
-<!-- 智譜 AI API Key 設定彈窗 -->
+<!-- AI API Key 設定彈窗（支援智譜 AI / OpenRouter / Gemini） -->
 <div class="confirm-overlay" id="apiModal">
   <div class="confirm-box">
-    <div class="c-title">🔑 智譜 AI 視覺識牌設定</div>
-    <div class="c-msg" style="text-align:left; font-size:12px; margin-bottom:10px;">
-      請輸入智譜 AI (BigModel) API Key（香港免 VPN 直連、永久免費）：<br>
-      <a href="[https://open.bigmodel.cn/usercenter/apikeys](https://open.bigmodel.cn/usercenter/apikeys)" target="_blank" style="color:#ffd200; text-decoration:underline;">👉 點此前往 open.bigmodel.cn 免費取得 API Key</a>
+    <div class="c-title">🔑 AI 視覺識牌設定</div>
+    <div class="c-msg" style="text-align:left; font-size:11px; margin-bottom:10px; line-height:1.6;">
+      支援以下任一免費 API Key（只會儲存在你的手機瀏覽器）：<br>
+      1️⃣ <a href="https://open.bigmodel.cn/usercenter/apikeys" target="_blank" style="color:#ffd200;">智譜 AI (open.bigmodel.cn)</a> — 香港直連永久免費<br>
+      2️⃣ <a href="https://openrouter.ai/keys" target="_blank" style="color:#ffd200;">OpenRouter (openrouter.ai)</a> — 貼上 <code>sk-or-...</code> 金鑰<br>
+      3️⃣ <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#ffd200;">Google Gemini</a> — 貼上 <code>AIza...</code> 金鑰
     </div>
-    <input type="password" id="apiKeyInput" class="ai-input" placeholder="貼上智譜 API Key (格式如 xxx.yyy)">
-    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">識牌模式：</div>
+    <input type="password" id="apiKeyInput" class="ai-input" placeholder="請貼上你的 API Key（勿留空格）">
+    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">AI 平台與免費模型：</div>
+    <select id="aiModelSelect" class="ai-select">
+      <option value="zhipu:glm-4v-flash">智譜 AI：glm-4v-flash（免費·香港直連）</option>
+      <option value="zhipu:glm-4v-plus">智譜 AI：glm-4v-plus（高階版）</option>
+      <option value="openrouter:google/gemma-3-27b-it:free">OpenRouter：Gemma 3 27B Vision（免費·GitHub Pages最穩）</option>
+      <option value="openrouter:qwen/qwen2.5-vl-32b-instruct:free">OpenRouter：Qwen 2.5 VL 32B（免費·中文視覺強）</option>
+      <option value="gemini:gemini-2.5-flash">Google Gemini：gemini-2.5-flash</option>
+    </select>
+    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">識牌填入模式：</div>
     <select id="aiFillMode" class="ai-select">
       <option value="replace">覆蓋全副牌（自動分暗牌/明牌/槓/花）</option>
       <option value="append">只加入到目前選取的目標區域</option>
-    </select>
-    <div style="text-align:left; font-size:11px; color:#aaa; margin-bottom:4px;">AI 模型：</div>
-    <select id="aiModelSelect" class="ai-select">
-      <option value="glm-4v-flash">glm-4v-flash（智譜免費版·香港直連推薦）</option>
-      <option value="glm-4v-plus">glm-4v-plus（智譜高階版）</option>
     </select>
     <div class="c-btns">
       <button class="c-btn-yes" style="background:linear-gradient(135deg,#27ae60,#1e8449);" onclick="saveApiSettings()">儲存</button>
@@ -327,8 +332,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 <div class="confirm-overlay" id="aiLoadingOverlay">
   <div class="confirm-box">
     <div class="loading-spinner"></div>
-    <div class="c-title">🤖 智譜 AI 正在辨識麻雀牌型...</div>
-    <div class="c-msg" style="margin-bottom:0;">正在分析萬、筒、索、字牌及花牌，請稍候 2~4 秒</div>
+    <div class="c-title">🤖 AI 正在辨識麻雀牌型...</div>
+    <div class="c-msg" style="margin-bottom:0;">正在分析萬、筒、索、字牌及花牌，請稍候 2~5 秒</div>
   </div>
 </div>
 
@@ -531,12 +536,12 @@ let cfBlue = 0;
 let cfSelectedTile = null;
 
 /* ============================================================
-   智譜 AI 相機拍照識牌功能 (GLM-4V-Flash)
+   AI 相機拍照識牌功能（支援智譜 AI / OpenRouter / Gemini）
    ============================================================ */
 function openApiModal() {
-  document.getElementById('apiKeyInput').value = localStorage.getItem('mahjong_zhipu_api_key') || '';
+  document.getElementById('apiKeyInput').value = localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key') || '';
   document.getElementById('aiFillMode').value = localStorage.getItem('mahjong_ai_fill_mode') || 'replace';
-  document.getElementById('aiModelSelect').value = localStorage.getItem('mahjong_ai_model') || 'glm-4v-flash';
+  document.getElementById('aiModelSelect').value = localStorage.getItem('mahjong_ai_provider_model') || 'zhipu:glm-4v-flash';
   document.getElementById('apiModal').classList.add('show');
 }
 
@@ -547,18 +552,29 @@ function closeApiModal() {
 function saveApiSettings() {
   const key = document.getElementById('apiKeyInput').value.trim();
   const mode = document.getElementById('aiFillMode').value;
-  const model = document.getElementById('aiModelSelect').value;
+  let providerModel = document.getElementById('aiModelSelect').value;
+
+  // 若用戶貼上特定格式的 Key，自動幫用戶配對正確平台
+  if (key.startsWith('AIza') && !providerModel.startsWith('gemini:')) {
+    providerModel = 'gemini:gemini-2.5-flash';
+    document.getElementById('aiModelSelect').value = providerModel;
+  } else if (key.startsWith('sk-or-') && !providerModel.startsWith('openrouter:')) {
+    providerModel = 'openrouter:google/gemma-3-27b-it:free';
+    document.getElementById('aiModelSelect').value = providerModel;
+  }
+
+  localStorage.setItem('mahjong_ai_api_key', key);
   localStorage.setItem('mahjong_zhipu_api_key', key);
   localStorage.setItem('mahjong_ai_fill_mode', mode);
-  localStorage.setItem('mahjong_ai_model', model);
+  localStorage.setItem('mahjong_ai_provider_model', providerModel);
   closeApiModal();
-  showToast('智譜 API 設定已儲存');
+  showToast('API 設定已儲存');
 }
 
 function triggerCamera() {
-  const apiKey = localStorage.getItem('mahjong_zhipu_api_key');
+  const apiKey = localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key');
   if (!apiKey) {
-    showToast('請先設定智譜 AI API Key');
+    showToast('請先設定 AI API Key');
     openApiModal();
     return;
   }
@@ -567,7 +583,7 @@ function triggerCamera() {
   input.click();
 }
 
-function compressImageToBase64(file, maxWidth = 1280, quality = 0.82) {
+function compressImageToBase64(file, maxWidth = 1024, quality = 0.8) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -590,7 +606,8 @@ function compressImageToBase64(file, maxWidth = 1280, quality = 0.82) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
+        const rawBase64 = dataUrl.split(',')[1];
+        resolve({ dataUrl, rawBase64 });
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -604,20 +621,30 @@ async function handleImageUpload(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
-  const apiKey = localStorage.getItem('mahjong_zhipu_api_key');
+  const apiKey = (localStorage.getItem('mahjong_ai_api_key') || localStorage.getItem('mahjong_zhipu_api_key') || '').trim();
   const fillMode = localStorage.getItem('mahjong_ai_fill_mode') || 'replace';
-  const modelName = localStorage.getItem('mahjong_ai_model') || 'glm-4v-flash';
+  let providerModel = localStorage.getItem('mahjong_ai_provider_model') || 'zhipu:glm-4v-flash';
 
   if (!apiKey) {
     openApiModal();
     return;
   }
 
+  // 根據 Key 特徵自動防呆校正平台
+  if (apiKey.startsWith('AIza')) providerModel = 'gemini:gemini-2.5-flash';
+  else if (apiKey.startsWith('sk-or-')) {
+    if (!providerModel.startsWith('openrouter:')) providerModel = 'openrouter:google/gemma-3-27b-it:free';
+  }
+
+  const [provider, modelName] = providerModel.includes(':')
+    ? [providerModel.split(':')[0], providerModel.split(':').slice(1).join(':')]
+    : ['zhipu', providerModel];
+
   const loadingEl = document.getElementById('aiLoadingOverlay');
   loadingEl.classList.add('show');
 
   try {
-    const dataUrl = await compressImageToBase64(file);
+    const { dataUrl, rawBase64 } = await compressImageToBase64(file);
 
     const promptText = `你是一個專業的港式台灣麻雀（17張牌）視覺辨識系統。請仔細辨識照片中的所有麻雀牌，並轉換為指定的代碼。
 
@@ -647,51 +674,108 @@ async function handleImageUpload(event) {
   "blueFlowers": 0
 }`;
 
-    const response = await fetch('[https://open.bigmodel.cn/api/paas/v4/chat/completions](https://open.bigmodel.cn/api/paas/v4/chat/completions)', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [
-          {
+    let response;
+    let rawText = '';
+
+    if (provider === 'gemini') {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      response = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: promptText },
+              { inline_data: { mime_type: 'image/jpeg', data: rawBase64 } }
+            ]
+          }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+        })
+      });
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Google Gemini 請求失敗 (HTTP ${response.status}) ${errText.slice(0, 120)}`);
+      }
+      const resJson = await response.json();
+      rawText = resJson.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    } else if (provider === 'openrouter') {
+      const orUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      response = await fetch(orUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [{
             role: 'user',
             content: [
-              {
-                type: 'image_url',
-                image_url: { url: dataUrl }
-              },
-              {
-                type: 'text',
-                text: promptText
-              }
+              { type: 'text', text: promptText },
+              { type: 'image_url', image_url: { url: dataUrl } }
             ]
-          }
-        ],
-        temperature: 0.1
-      })
-    });
+          }],
+          temperature: 0.1
+        })
+      });
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`OpenRouter 請求失敗 (HTTP ${response.status}) ${errText.slice(0, 120)}`);
+      }
+      const resJson = await response.json();
+      rawText = resJson.choices?.[0]?.message?.content || '';
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `API 請求失敗 (HTTP ${response.status})`);
+    } else {
+      // 智譜 AI (BigModel glm-4v-flash)
+      const zhipuUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+      response = await fetch(zhipuUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({
+          model: modelName || 'glm-4v-flash',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: { url: rawBase64 }
+                },
+                {
+                  type: 'text',
+                  text: promptText
+                }
+              ]
+            }
+          ],
+          temperature: 0.1
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`智譜 API 請求失敗 (HTTP ${response.status}) ${errText.slice(0, 120)}`);
+      }
+      const resJson = await response.json();
+      rawText = resJson.choices?.[0]?.message?.content || '';
     }
 
-    const resultJson = await response.json();
-    const rawText = resultJson.choices?.[0]?.message?.content;
-    if (!rawText) throw new Error('智譜 AI 未回傳任何辨識結果');
+    if (!rawText) throw new Error('AI 未回傳任何辨識結果');
 
-    // 自動從回傳內容提取 JSON 物件（支援過濾 ```json 標籤與前後雜訊）
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('無法解析 AI 回傳的牌型格式');
+    if (!jsonMatch) throw new Error('無法解析 AI 回傳的牌型格式：' + rawText.slice(0, 80));
 
     const parsed = JSON.parse(jsonMatch[0]);
     applyAiRecognizedTiles(parsed, fillMode);
   } catch (err) {
     console.error(err);
-    alert('AI 識牌失敗：' + err.message + '\n請確認智譜 API Key 是否正確或網路是否正常。');
+    alert('AI 識牌失敗：' + err.message + '\n\n💡 提示：請勿將 API Key 貼進程式碼的 fetch 網址內！請點右上角「🔑 API 設定」貼上 Key。若智譜被網絡阻擋，可在設定切換為 OpenRouter 免費版。');
   } finally {
     loadingEl.classList.remove('show');
   }
@@ -1053,7 +1137,6 @@ function detectWinPatterns(hand, winTile) {
   const items = [];
   let total = 0;
 
-  // ---------- 對碰 ----------
   let pairPong = false;
   if ((beforeCounts[winId] || 0) >= 2) {
     for (const id in beforeCounts) {
@@ -1066,7 +1149,6 @@ function detectWinPatterns(hand, winTile) {
     total += 2;
   }
 
-  // ---------- 聽牌分析：獨獨 / 假獨 ----------
   const possibleWins = [];
   for (const t of TILE_DEFS) {
     const testCounts = { ...beforeCounts };
