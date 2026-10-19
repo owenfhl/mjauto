@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>多狗計數機v2</title>
+<title>多仔港式台牌 自動算番 2026</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans TC", sans-serif; background:#1a1a2e; color:#eee; min-height:100vh; padding:8px; padding-bottom:190px; user-select:none; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans TC", sans-serif; background:#1a1a2e; color:#eee; min-height:100vh; padding:8px; padding-bottom:195px; user-select:none; }
 .header { text-align:center; padding:10px 0 8px; }
 .header h1 { font-size:18px; font-weight:800; background:linear-gradient(135deg,#f7971e,#ffd200); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .header p { font-size:11px; color:#888; margin-top:3px; }
@@ -33,7 +33,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .tile .badge { position:absolute; top:-4px; right:-4px; background:#ffd200; color:#1a1a2e; font-size:9px; font-weight:800; width:16px; height:16px; line-height:16px; border-radius:50%; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.4); z-index:2; }
 .tile img { width:100%; height:100%; object-fit:contain; border-radius:4px; pointer-events:none; }
 
-.hand-area { position:fixed; bottom:0; left:0; right:0; background:#16213e; border-top:2px solid #f7971e; padding:6px 8px 10px; z-index:9999; box-shadow:0 -4px 20px rgba(0,0,0,0.5); pointer-events:auto; max-height:215px; overflow-y:auto; }
+.hand-area { position:fixed; bottom:0; left:0; right:0; background:#16213e; border-top:2px solid #f7971e; padding:6px 8px 10px; z-index:9999; box-shadow:0 -4px 20px rgba(0,0,0,0.5); pointer-events:auto; max-height:220px; overflow-y:auto; }
 .mode-selector { display:flex; background:#0f3460; border-radius:6px; padding:3px; margin-bottom:6px; border:1px solid #1a4a7a; }
 .mode-btn { flex:1; text-align:center; padding:5px; font-size:11px; font-weight:700; color:#888; border-radius:4px; cursor:pointer; }
 .mode-btn.active { background:#f7971e; color:#1a1a2e; }
@@ -60,13 +60,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .hand-tile .honor.black { color:#333; }
 .hand-tile img { width:100%; height:100%; object-fit:contain; border-radius:3px; pointer-events:none; }
 
-.hand-actions { display:flex; gap:4px; position:relative; z-index:10000; flex-wrap: wrap; }
-.hand-actions button { flex:1; min-width: 70px; padding:10px 4px; border-radius:8px; border:none; font-size:11px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; }
+.hand-actions { display:flex; gap:5px; position:relative; z-index:10000; }
+.hand-actions button { flex:1; padding:10px 4px; border-radius:8px; border:none; font-size:12px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; white-space:nowrap; }
 .hand-actions button:active { transform:scale(0.95); }
-.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); }
-.btn-clear { background:#e74c3c; color:#fff; flex:0.6; }
-.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.7; }
-.btn-ai { background: linear-gradient(135deg,#8e44ad,#9b59b6); color:#fff; box-shadow:0 2px 8px rgba(142,68,173,0.4); }
+.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); flex:1.1 !important; }
+.btn-ai { background:linear-gradient(135deg,#8e2de2,#4a00e0); color:#fff; box-shadow:0 2px 8px rgba(142,45,226,0.4); flex:0.95 !important; }
+.btn-clear { background:#e74c3c; color:#fff; flex:0.55 !important; }
+.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.65 !important; }
 
 .result-panel { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:20000; display:none; flex-direction:column; backdrop-filter:blur(8px); }
 .result-panel.show { display:flex; }
@@ -82,19 +82,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .result-item .r-fan { font-size:15px; font-weight:800; color:#ffd200; }
 .result-item.highlight { border-left-color:#ffd200; background:#1a2a5a; box-shadow:0 0 8px rgba(255,210,0,0.15); }
 .result-none { text-align:center; color:#666; padding:30px; font-size:14px; }
-.result-note { font-size:11px; color:#888; text-align:center; padding:10px; line-height:1.6; }
 .history-list { padding:12px; }
 .history-item { background:#16213e; border-radius:10px; padding:12px; margin-bottom:8px; border-left:3px solid #f7971e; }
 .history-item .h-total { font-size:18px; font-weight:800; color:#ffd200; }
 .history-item .h-detail { font-size:11px; color:#999; margin-top:4px; line-height:1.6; }
 .history-item .h-time { font-size:10px; color:#666; margin-top:4px; }
 .empty-state { text-align:center; color:#555; padding:40px 20px; font-size:14px; }
-.toast { position:fixed; bottom:215px; left:50%; transform:translateX(-50%) translateY(20px); background:#ffd200; color:#1a1a2e; font-size:13px; font-weight:800; padding:10px 24px; border-radius:20px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:30000; white-space:nowrap; }
+.toast { position:fixed; bottom:220px; left:50%; transform:translateX(-50%) translateY(20px); background:#ffd200; color:#1a1a2e; font-size:13px; font-weight:800; padding:10px 24px; border-radius:20px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:50000; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 40000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 40000; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+}
 .confirm-overlay.show { display: flex; }
-.confirm-box { background: #16213e; border-radius: 14px; padding: 16px; max-width: 420px; width: 94%; border: 1px solid #f7971e55; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.confirm-box {
+  background: #16213e; border-radius: 14px; padding: 16px;
+  max-width: 420px; width: 94%; border: 1px solid #f7971e55;
+  text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
 .confirm-box .c-title { font-size: 17px; font-weight: 800; color: #ffd200; margin-bottom: 8px; }
 .confirm-box .c-msg { font-size: 13px; color: #ccc; margin-bottom: 14px; line-height: 1.5; }
 .confirm-box .c-btns { display: flex; gap: 10px; margin-top: 12px; }
@@ -102,6 +110,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .c-btn-yes { background: #e74c3c; color: #fff; }
 .c-btn-no { background: #16213e; color: #ffd200; border: 1px solid #f7971e55 !important; }
 
+/* 加番按鈕區（僅確認畫面使用） */
 .bonus-section { margin-top: 14px; background:#0f3460; border-radius:10px; padding:10px; border:1px solid #1a4a7a; }
 .bonus-title { font-size:12px; font-weight:800; color:#ffd200; margin-bottom:8px; }
 .bonus-group { margin-bottom:10px; }
@@ -110,12 +119,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .bonus-btn { padding:10px 6px; border-radius:8px; border:1px solid #1a4a7a; background:#16213e; color:#ccc; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; text-align:center; }
 .bonus-btn.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; box-shadow:0 0 8px rgba(247,151,30,0.6); }
 .bonus-btn:active { transform:scale(0.95); }
-.bonus-hint { font-size:9px; color:#667; margin-top:4px; line-height:1.4; }
 
+/* 雙食嚦咕 variant chip */
 .variant-chip { display:inline-block; padding:2px 10px; border-radius:8px; background:#0f3460; border:1px solid #f7971e55; cursor:pointer; color:#ffd200; }
 .variant-chip.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; }
 .variant-plus { color:#f7971e; margin:0 4px; font-weight:900; }
 
+/* 確認視窗：花牌與食胡牌選擇 */
 .confirm-flower { background:#0f3460; border-radius:8px; padding:8px 10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; }
 .confirm-flower .cf-title { font-size:12px; font-weight:800; color:#ffd200; margin-bottom:6px; }
 .confirm-flower .cf-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
@@ -146,33 +156,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .confirm-bonus { background:#0f3460; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; max-height:260px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .confirm-bonus .cf-title { font-size:13px; font-weight:800; color:#ffd200; margin-bottom:8px; }
 
-/* AI 識別面板樣式 */
-.ai-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 25000; display: none; flex-direction: column; backdrop-filter: blur(8px); }
-.ai-panel.show { display: flex; }
-.ai-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
-.ai-header h2 { font-size:18px; color:#9b59b6; }
-.ai-header button { background:#e74c3c; border:none; color:#fff; font-size:14px; padding:8px 16px; border-radius:8px; cursor:pointer; }
-.ai-body { flex:1; overflow-y:auto; padding:16px; }
-.ai-upload-box { border: 2px dashed #9b59b6; border-radius: 12px; padding: 30px 16px; text-align: center; cursor: pointer; margin-bottom: 16px; background: #16213e; }
-.ai-upload-box input { display: none; }
-.ai-upload-box .ai-icon { font-size: 40px; margin-bottom: 8px; }
-.ai-upload-box .ai-label { font-size: 13px; color: #ccc; }
-.ai-preview img { max-width: 100%; max-height: 240px; border-radius: 8px; margin-bottom: 12px; }
-.ai-status { font-size: 13px; color: #ffd200; text-align: center; min-height: 20px; margin-bottom: 8px; font-weight: bold; white-space: pre-wrap; }
-.ai-status.error { color: #e74c3c; }
-.ai-result { background:#0f3460; border-radius:8px; padding:10px; font-size:13px; line-height:1.6; word-break:break-all; margin-bottom:12px; display:none; border:1px solid #9b59b6; }
-.ai-result.show { display:block; }
-.ai-actions { display:flex; gap:8px; margin-top:8px; }
-.ai-actions button { flex:1; padding:12px; border-radius:10px; border:none; font-size:14px; font-weight:700; cursor:pointer; }
-.ai-btn-apply { background:linear-gradient(135deg,#27ae60,#1e8449); color:#fff; }
-.ai-btn-retry { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; }
+/* OpenRouter AI 相片辨識專用樣式 */
+.ai-field { background:#0f3460; border-radius:8px; padding:10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; }
+.ai-field label { display:block; font-size:11px; font-weight:800; color:#ffd200; margin-bottom:5px; }
+.ai-input, .ai-select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #2a5a8a; background:#16213e; color:#fff; font-size:12px; outline:none; }
+.ai-input:focus, .ai-select:focus { border-color:#f7971e; }
+.ai-upload-area { border:2px dashed #f7971e88; border-radius:10px; padding:16px 10px; text-align:center; background:#0f346088; cursor:pointer; margin-bottom:10px; transition:all 0.2s; }
+.ai-upload-area:active { transform:scale(0.98); background:#0f3460; }
+.ai-preview-img { max-width:100%; max-height:180px; border-radius:8px; margin-top:8px; display:none; border:1px solid #ffd20055; margin-left:auto; margin-right:auto; }
+.ai-status { font-size:12px; color:#ffd200; margin:8px 0; min-height:18px; font-weight:700; line-height:1.4; }
+.ai-mode-row { display:flex; gap:6px; margin-top:6px; }
+.ai-mode-opt { flex:1; padding:7px 4px; font-size:11px; font-weight:700; border-radius:6px; background:#16213e; color:#aaa; border:1px solid #2a5a8a; cursor:pointer; text-align:center; }
+.ai-mode-opt.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1> 多狗計數機 </h1>
-  <p>2026測試版v1 有問題聯絡Owen </p>
+  <p>2026測試版v1 (支援 OpenRouter AI 識牌) 有問題聯絡Owen </p>
 </div>
 
 <div class="tabs">
@@ -216,8 +218,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
   
   <div class="hand-actions">
-    <button class="btn-ai" onclick="openAiPanel()">📷 AI 識別</button>
-    <button class="btn-calc" onclick="openCalcConfirm()">🧮 計算</button>
+    <button class="btn-calc" onclick="openCalcConfirm()">🧮 計算番數</button>
+    <button class="btn-ai" onclick="openAiModal()">📸 AI 識牌</button>
     <button class="btn-clear" onclick="clearHand()">🗑 清空</button>
     <button class="btn-history2" onclick="toggleHistory()">📋 紀錄 (<span id="historyCount">0</span>)</button>
   </div>
@@ -243,33 +245,49 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
 </div>
 
-<!-- AI 識別牌面板 -->
-<div class="ai-panel" id="aiPanel">
-  <div class="ai-header">
-    <h2>📷 AI 識別牌</h2>
-    <button onclick="closeAiPanel()">✕ 關閉</button>
-  </div>
-  <div class="ai-body">
-    <div class="ai-upload-box" onclick="document.getElementById('aiFileInput').click()">
-      <div class="ai-icon">🀫</div>
-      <div class="ai-label">點擊上傳／拍攝牌面照片<br><span style="font-size:11px;color:#888;">支援 JPG、PNG（建議裁切到只剩牌面）</span></div>
-      <input type="file" id="aiFileInput" accept="image/*" capture="environment" onchange="handleAiImage(event)">
+<!-- OpenRouter AI 相片辨識視窗 -->
+<div class="confirm-overlay" id="aiModalOverlay">
+  <div class="confirm-box">
+    <div class="c-title">📸 OpenRouter AI 麻將相片辨識</div>
+    <div class="c-msg" style="margin-bottom:10px;">影低或上傳你副麻將相片，AI 自動幫你擺入牌區！</div>
+
+    <div class="ai-field">
+      <label>🔑 OpenRouter API Key（自動儲存於本機）</label>
+      <input type="password" id="aiApiKey" class="ai-input" placeholder="sk-or-v1-..." onchange="saveAiSettings()">
+      <label style="margin-top:8px;">🤖 選擇視覺模型 (Vision Model)</label>
+      <select id="aiModelSelect" class="ai-select" onchange="onAiModelChange()">
+        <option value="google/gemini-2.5-flash">Google: Gemini 2.5 Flash (推薦/快/平)</option>
+        <option value="google/gemini-2.5-pro">Google: Gemini 2.5 Pro (高準確度)</option>
+        <option value="openai/gpt-4o-mini">OpenAI: GPT-4o Mini</option>
+        <option value="openai/gpt-4o">OpenAI: GPT-4o</option>
+        <option value="anthropic/claude-3.5-sonnet">Anthropic: Claude 3.5 Sonnet</option>
+        <option value="qwen/qwen2.5-vl-72b-instruct">Qwen: Qwen2.5-VL 72B</option>
+        <option value="custom">✏️ 自訂模型名稱...</option>
+      </select>
+      <input type="text" id="aiCustomModel" class="ai-input" placeholder="例如: meta-llama/llama-3.2-90b-vision-instruct" style="margin-top:6px;display:none;" onchange="saveAiSettings()">
     </div>
 
-    <div class="ai-preview" id="aiPreview"></div>
-    <div class="ai-status" id="aiStatus"></div>
-
-    <div class="ai-result" id="aiResult"></div>
-
-    <div class="ai-actions" id="aiActions" style="display:none;">
-      <button class="ai-btn-apply" onclick="applyAiResult()">✅ 套用到暗手牌</button>
-      <button class="ai-btn-retry" onclick="resetAiPanel()">🔄 重新上傳</button>
+    <div class="ai-field">
+      <label>📥 匯入模式</label>
+      <div class="ai-mode-row">
+        <div class="ai-mode-opt active" id="aiModeSmart" onclick="setAiImportMode('smart')">智能分區 (清空並自動分暗/明/花)</div>
+        <div class="ai-mode-opt" id="aiModeAppend" onclick="setAiImportMode('append')">加入目前選中分區</div>
+      </div>
     </div>
 
-    <div style="font-size:10px;color:#556;line-height:1.6;margin-top:16px;">
-      ※ 使用 OpenRouter 免費模型 (Nemotron 3.5 Super VL)，首次使用需貼上 API Key（僅儲存在本機）。<br>
-      ※ AI 辨識僅供輔助，套用後請人手核對每張牌。<br>
-      ※ 如辨識失敗，可嘗試裁切圖片到只剩麻將牌區域，或改用光線充足的環境重拍。
+    <input type="file" id="aiFileInput" accept="image/*" style="display:none;" onchange="handleAiImageSelect(event)">
+    <div class="ai-upload-area" onclick="document.getElementById('aiFileInput').click()">
+      <div style="font-size:24px;margin-bottom:4px;">📷 / 🖼️</div>
+      <div style="font-size:13px;font-weight:800;color:#ffd200;">點擊拍照 或 揀選麻將相片</div>
+      <div style="font-size:10px;color:#aaa;margin-top:3px;">請盡量由正上方拍攝，確保牌面清晰</div>
+      <img id="aiPreviewImg" class="ai-preview-img" alt="預覽圖片">
+    </div>
+
+    <div class="ai-status" id="aiStatusText"></div>
+
+    <div class="c-btns">
+      <button class="c-btn-yes" id="aiStartBtn" onclick="recognizeTilesWithAI()" style="background:linear-gradient(135deg,#8e2de2,#4a00e0);">⚡ 開始 AI 辨識</button>
+      <button class="c-btn-no" onclick="closeAiModal()">關閉</button>
     </div>
   </div>
 </div>
@@ -358,12 +376,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
           <button class="bonus-btn" data-bonus="flowerKong7" onclick="cfToggleBonus('flowerKong7', 120)">花槓7</button>
         </div>
       </div>
-
-      <div class="bonus-hint">
-        ※ 自摸由上方按鈕控制；食胡牌所在面子非自摸時視為「明」，自摸時視為「暗」。<br>
-        ※ 叮額外：一般門清叮 +10；十六不搭／十三幺／嚦咕嚦咕門清叮只 +5。<br>
-        ※ 食胡牌所在面子明／暗不影響門清與門清叮 +10。
-      </div>
     </div>
 
     <div class="confirm-tiles">
@@ -408,6 +420,348 @@ TILE_DEFS.push({ suit:'dragon', num:3, id:'bak',   label:'白', type:'honor', co
 const TILE_MAP = {};
 TILE_DEFS.forEach(t => TILE_MAP[t.id] = t);
 
+/* ============================================================
+   OpenRouter AI 相片辨識邏輯
+   ============================================================ */
+let aiBase64Image = null;
+let aiImportMode = 'smart'; // 'smart' | 'append'
+
+function loadAiSettings() {
+  const savedKey = localStorage.getItem('openrouter_api_key') || '';
+  const savedModel = localStorage.getItem('openrouter_model') || 'google/gemini-2.5-flash';
+  const savedCustom = localStorage.getItem('openrouter_custom_model') || '';
+
+  const keyInput = document.getElementById('aiApiKey');
+  const modelSelect = document.getElementById('aiModelSelect');
+  const customInput = document.getElementById('aiCustomModel');
+
+  if (keyInput) keyInput.value = savedKey;
+  if (modelSelect) {
+    const hasOption = Array.from(modelSelect.options).some(opt => opt.value === savedModel);
+    if (hasOption) {
+      modelSelect.value = savedModel;
+    } else {
+      modelSelect.value = 'custom';
+      if (customInput) customInput.value = savedModel;
+    }
+    onAiModelChange();
+  }
+  if (customInput && savedCustom && !customInput.value) {
+    customInput.value = savedCustom;
+  }
+}
+
+function saveAiSettings() {
+  const keyInput = document.getElementById('aiApiKey');
+  const modelSelect = document.getElementById('aiModelSelect');
+  const customInput = document.getElementById('aiCustomModel');
+  if (keyInput) localStorage.setItem('openrouter_api_key', keyInput.value.trim());
+  if (modelSelect) {
+    if (modelSelect.value === 'custom' && customInput) {
+      localStorage.setItem('openrouter_model', customInput.value.trim());
+      localStorage.setItem('openrouter_custom_model', customInput.value.trim());
+    } else {
+      localStorage.setItem('openrouter_model', modelSelect.value);
+    }
+  }
+}
+
+function onAiModelChange() {
+  const modelSelect = document.getElementById('aiModelSelect');
+  const customInput = document.getElementById('aiCustomModel');
+  if (modelSelect.value === 'custom') {
+    customInput.style.display = 'block';
+  } else {
+    customInput.style.display = 'none';
+  }
+  saveAiSettings();
+}
+
+function setAiImportMode(mode) {
+  aiImportMode = mode;
+  document.getElementById('aiModeSmart').classList.toggle('active', mode === 'smart');
+  document.getElementById('aiModeAppend').classList.toggle('active', mode === 'append');
+}
+
+function openAiModal() {
+  loadAiSettings();
+  document.getElementById('aiStatusText').textContent = '';
+  document.getElementById('aiModalOverlay').classList.add('show');
+}
+
+function closeAiModal() {
+  document.getElementById('aiModalOverlay').classList.remove('show');
+}
+
+function handleAiImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('aiStatusText');
+  statusEl.textContent = '⏳ 正在處理及壓縮相片...';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const maxDim = 1280;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round(h * (maxDim / w));
+          w = maxDim;
+        } else {
+          w = Math.round(w * (maxDim / h));
+          h = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      aiBase64Image = canvas.toDataURL('image/jpeg', 0.85);
+
+      const previewEl = document.getElementById('aiPreviewImg');
+      previewEl.src = aiBase64Image;
+      previewEl.style.display = 'block';
+      statusEl.textContent = '✅ 相片已準備好，請按「開始 AI 辨識」';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function normalizeAiTileId(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim().toLowerCase();
+  if (TILE_MAP[s]) return s;
+
+  // 支援常見簡寫如 1m, 1p, 1s, 1z..7z 或中文名
+  const mMatch = s.match(/^([1-9])m$/);
+  if (mMatch) return `wan${mMatch[1]}`;
+  const pMatch = s.match(/^([1-9])p$/);
+  if (pMatch) return `tong${pMatch[1]}`;
+  const sMatch = s.match(/^([1-9])s$/);
+  if (sMatch) return `so${sMatch[1]}`;
+
+  const cnMap = {
+    '一萬':'wan1','二萬':'wan2','三萬':'wan3','四萬':'wan4','五萬':'wan5','六萬':'wan6','七萬':'wan7','八萬':'wan8','九萬':'wan9',
+    '1萬':'wan1','2萬':'wan2','3萬':'wan3','4萬':'wan4','5萬':'wan5','6萬':'wan6','7萬':'wan7','8萬':'wan8','9萬':'wan9',
+    '一筒':'tong1','二筒':'tong2','三筒':'tong3','四筒':'tong4','五筒':'tong5','六筒':'tong6','七筒':'tong7','八筒':'tong8','九筒':'tong9',
+    '1筒':'tong1','2筒':'tong2','3筒':'tong3','4筒':'tong4','5筒':'tong5','6筒':'tong6','7筒':'tong7','8筒':'tong8','9筒':'tong9',
+    '一索':'so1','二索':'so2','三索':'so3','四索':'so4','五索':'so5','六索':'so6','七索':'so7','八索':'so8','九索':'so9',
+    '一條':'so1','二條':'so2','三條':'so3','四條':'so4','五條':'so5','六條':'so6','七條':'so7','八條':'so8','九條':'so9',
+    '1索':'so1','2索':'so2','3索':'so3','4索':'so4','5索':'so5','6索':'so6','7索':'so7','8索':'so8','9索':'so9',
+    '東':'east','1z':'east','南':'south','2z':'south','西':'west','3z':'west','北':'north','4z':'north',
+    '白':'bak','白板':'bak','5z':'bak','發':'fat','發財':'fat','6z':'fat','中':'chung','紅中':'chung','7z':'chung'
+  };
+  return cnMap[s] || null;
+}
+
+async function recognizeTilesWithAI() {
+  const apiKey = document.getElementById('aiApiKey').value.trim();
+  const modelSelect = document.getElementById('aiModelSelect').value;
+  const customModel = document.getElementById('aiCustomModel').value.trim();
+  const model = (modelSelect === 'custom') ? customModel : modelSelect;
+  const statusEl = document.getElementById('aiStatusText');
+  const startBtn = document.getElementById('aiStartBtn');
+
+  if (!apiKey) {
+    showToast('請先輸入 OpenRouter API Key');
+    statusEl.textContent = '❌ 請先輸入 OpenRouter API Key';
+    return;
+  }
+  if (!model) {
+    showToast('請選擇或輸入模型名稱');
+    statusEl.textContent = '❌ 請選擇或輸入模型名稱';
+    return;
+  }
+  if (!aiBase64Image) {
+    showToast('請先拍照或揀選麻將相片');
+    statusEl.textContent = '❌ 請先拍照或上傳相片';
+    return;
+  }
+
+  saveAiSettings();
+  startBtn.disabled = true;
+  startBtn.style.opacity = '0.6';
+  statusEl.textContent = '🤖 OpenRouter AI 正在辨識麻將牌面，請稍候...';
+
+  const systemPrompt = `你是一個專業的港式台灣麻將（16張麻將，食糊共17張）視覺辨識助手。
+請仔細觀察用戶提供的麻將相片，辨識出相片中的所有麻將牌，並嚴格以 JSON 格式輸出，不要包含任何其他多餘文字。
+
+【麻將牌 ID 對照表（必須使用以下指定 ID）】：
+- 萬子 (一萬至九萬): "wan1", "wan2", "wan3", "wan4", "wan5", "wan6", "wan7", "wan8", "wan9"
+- 筒子/餅子 (一筒至九筒): "tong1", "tong2", "tong3", "tong4", "tong5", "tong6", "tong7", "tong8", "tong9"
+- 索子/條子 (一索至九索，注意一索通常是雀鳥圖案): "so1", "so2", "so3", "so4", "so5", "so6", "so7", "so8", "so9"
+- 風牌 (東南西北): "east", "south", "west", "north"
+- 三元牌 (紅中、發財、白板/藍框白板): "chung", "fat", "bak"
+
+【分區規則】：
+1. "closed": 暗手牌（立起或排在玩家自己面前未公開的主手牌，每一張請獨立列出 ID）。如無法區分明暗，預設放入 "closed"。
+2. "open": 明手牌（已上、碰、攤開的順子或刻子，每一張請獨立列出 ID）。
+3. "kongs": 槓牌（4張相同的牌組成的槓），格式為 [{"id": "牌ID", "type": "open" 或 "closed"}]。如果不確定是否為槓，請直接放入 closed 或 open。
+4. "redFlowers": 紅花（春夏秋冬 / 紅色字花牌）的數量（整數 0-4）。
+5. "blueFlowers": 藍花（梅蘭竹菊 / 藍色或綠色字花牌）的數量（整數 0-4）。
+
+請只回傳以下 JSON 結構：
+{
+  "closed": ["wan1", "wan2", "wan3"],
+  "open": [],
+  "kongs": [],
+  "redFlowers": 0,
+  "blueFlowers": 0
+}`;
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.href || 'https://localhost',
+        'X-Title': 'HKTW Mahjong Calculator 2026'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: systemPrompt },
+              { type: 'image_url', image_url: { url: aiBase64Image } }
+            ]
+          }
+        ],
+        temperature: 0.1
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP 錯誤 (${response.status})`);
+    }
+
+    const data = await response.json();
+    const rawContent = data?.choices?.[0]?.message?.content || '';
+    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('AI 未能回傳有效 JSON 格式，請重試或更換模型');
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    applyAiRecognitionResult(parsed);
+  } catch (err) {
+    console.error('AI 辨識錯誤:', err);
+    statusEl.textContent = '❌ 辨識失敗：' + err.message;
+    showToast('AI 辨識失敗');
+  } finally {
+    startBtn.disabled = false;
+    startBtn.style.opacity = '1';
+  }
+}
+
+function applyAiRecognitionResult(parsed) {
+  const closedArr = Array.isArray(parsed.closed) ? parsed.closed : (Array.isArray(parsed.tiles) ? parsed.tiles : []);
+  const openArr = Array.isArray(parsed.open) ? parsed.open : [];
+  const kongsArr = Array.isArray(parsed.kongs) ? parsed.kongs : [];
+  const rFlowers = parseInt(parsed.redFlowers, 10) || 0;
+  const bFlowers = parseInt(parsed.blueFlowers, 10) || 0;
+
+  if (aiImportMode === 'smart') {
+    closedSection = [];
+    openSection = [];
+    kongSection = [];
+    redFlowerCount = Math.min(4, Math.max(0, rFlowers));
+    blueFlowerCount = Math.min(4, Math.max(0, bFlowers));
+  }
+
+  let addedCount = 0;
+
+  const canAddTile = (id, needed = 1) => {
+    const used = getAllSelectedTilesForWall().filter(x => x === id).length;
+    return (used + needed) <= 4;
+  };
+
+  if (aiImportMode === 'smart') {
+    kongsArr.forEach(k => {
+      const id = normalizeAiTileId(typeof k === 'string' ? k : k?.id);
+      const kType = (k && k.type === 'open') ? 'open' : 'closed';
+      if (id && canAddTile(id, 4)) {
+        kongSection.push({ id, type: kType });
+        addedCount += 3;
+      }
+    });
+
+    openArr.forEach(raw => {
+      const id = normalizeAiTileId(raw);
+      if (id && canAddTile(id, 1)) {
+        openSection.push(id);
+        addedCount++;
+      }
+    });
+
+    closedArr.forEach(raw => {
+      const id = normalizeAiTileId(raw);
+      if (id && canAddTile(id, 1)) {
+        closedSection.push(id);
+        addedCount++;
+      }
+    });
+  } else {
+    const allRecognized = [...closedArr, ...openArr];
+    kongsArr.forEach(k => {
+      const id = typeof k === 'string' ? k : k?.id;
+      if (id) allRecognized.push(id);
+    });
+    allRecognized.forEach(raw => {
+      const id = normalizeAiTileId(raw);
+      if (!id) return;
+      if (targetSection === 'kong') {
+        if (canAddTile(id, 4)) {
+          kongSection.push({ id, type: currentKongType });
+          addedCount += 3;
+        }
+      } else if (targetSection === 'open') {
+        if (canAddTile(id, 1)) {
+          openSection.push(id);
+          addedCount++;
+        }
+      } else {
+        if (canAddTile(id, 1)) {
+          closedSection.push(id);
+          addedCount++;
+        }
+      }
+    });
+  }
+
+  refreshUI();
+
+  const totalCalc = openSection.length + closedSection.length + (kongSection.length * 3);
+  const statusEl = document.getElementById('aiStatusText');
+
+  if (addedCount === 0) {
+    statusEl.textContent = '⚠️ 未能從相片中辨識出有效麻將牌，請確保相片清晰再試。';
+    showToast('未能辨識出麻將牌');
+    return;
+  }
+
+  closeAiModal();
+  showToast(`✅ 成功辨識！目前共 ${totalCalc} 張牌`);
+
+  if (totalCalc === 17) {
+    setTimeout(() => {
+      openCalcConfirm();
+    }, 350);
+  }
+}
+
+/* ============================================================
+   原本計番表與核心邏輯
+   ============================================================ */
 const FAN_TABLE = [
   { id:'eachFlower', name:'花', fan:2, cat:'花摸' },
   { id:'properFlower', name:'正/爛花', fan:2, cat:'花摸' },
@@ -569,13 +923,16 @@ let kongSection = [];
 let historyData = [];
 let resultData = null;
 
+// 結算加番狀態
 let bonusState = {};
 let baseResultTotal = 0;
 let baseResultDetail = [];
 
+// 雙食嚦咕
 let bonusStateByVariant = null;
 let currentVariantIndex = 0;
 
+// 確認視窗暫存
 let cfRed = 0;
 let cfBlue = 0;
 let cfSelectedTile = null;
@@ -761,247 +1118,6 @@ function switchTab(tab, el) {
   document.querySelectorAll('.wall-section').forEach(s => s.classList.remove('active'));
   if (tab === 'wall') document.getElementById('wallSection').classList.add('active');
   else document.getElementById('resultSection').classList.add('active');
-}
-
-/* ============================================================
-   AI 識別牌模組 (包含 502 自動重試與降級機制)
-   ============================================================ */
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-// 備用模型列表：主模型失敗時會依序嘗試
-const AI_MODELS = [
-  'nvidia/nemotron-3.5-super-vl:free',
-  'google/gemma-4-31b-it:free',
-  'qwen/qwen2.5-vl-72b-instruct:free'
-];
-let aiRecognizedTiles = [];
-
-function getApiKey() {
-  let key = localStorage.getItem('openrouter_api_key');
-  if (!key) {
-    key = prompt('請輸入 OpenRouter API Key（免費申請：https://openrouter.ai/keys）\n僅儲存在你這部裝置的瀏覽器，不會上傳到任何伺服器。');
-    if (key) localStorage.setItem('openrouter_api_key', key.trim());
-  }
-  return key;
-}
-
-function openAiPanel() {
-  resetAiPanel();
-  document.getElementById('aiPanel').classList.add('show');
-}
-
-function closeAiPanel() {
-  document.getElementById('aiPanel').classList.remove('show');
-}
-
-function resetAiPanel() {
-  aiRecognizedTiles = [];
-  document.getElementById('aiFileInput').value = '';
-  document.getElementById('aiPreview').innerHTML = '';
-  document.getElementById('aiStatus').textContent = '';
-  document.getElementById('aiStatus').className = 'ai-status';
-  document.getElementById('aiResult').textContent = '';
-  document.getElementById('aiResult').classList.remove('show');
-  document.getElementById('aiActions').style.display = 'none';
-}
-
-async function handleAiImage(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const statusEl = document.getElementById('aiStatus');
-  statusEl.className = 'ai-status';
-  statusEl.textContent = '圖片處理中...';
-  document.getElementById('aiActions').style.display = 'none';
-  document.getElementById('aiResult').classList.remove('show');
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    document.getElementById('aiPreview').innerHTML = `<img src="${e.target.result}" alt="預覽">`;
-
-    try {
-      const compressedDataUrl = await compressImage(file, 1024, 0.8);
-      statusEl.textContent = 'AI 辨識中，請稍候...';
-
-      const apiKey = getApiKey();
-      if (!apiKey) {
-        statusEl.className = 'ai-status error';
-        statusEl.textContent = '未提供 API Key，無法辨識';
-        return;
-      }
-
-      const result = await callOpenRouterVision(compressedDataUrl, apiKey);
-      aiRecognizedTiles = result.tiles;
-
-      if (aiRecognizedTiles.length === 0) {
-        statusEl.className = 'ai-status error';
-        statusEl.textContent = 'AI 未能辨識到任何麻將牌，請嘗試更清晰的圖片';
-        document.getElementById('aiResult').textContent = result.raw;
-        document.getElementById('aiResult').classList.add('show');
-        return;
-      }
-
-      statusEl.textContent = `✅ 辨識完成，共 ${aiRecognizedTiles.length} 張牌 (使用模型: ${result.usedModel.split('/')[1]})`;
-      document.getElementById('aiResult').innerHTML = `<span style="color:#ffd200;font-weight:bold;">辨識結果：</span><br>` + 
-        aiRecognizedTiles.map(t => TILE_MAP[t.id]?.label || t.id).join(' ');
-      document.getElementById('aiResult').classList.add('show');
-      document.getElementById('aiActions').style.display = 'flex';
-
-    } catch (err) {
-      console.error(err);
-      statusEl.className = 'ai-status error';
-      statusEl.textContent = '辨識失敗：' + err.message;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-function compressImage(file, maxSize, quality) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width > maxSize || height > maxSize) {
-        const ratio = Math.min(maxSize / width, maxSize / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-function extractJSON(text) {
-  if (!text) return null;
-  let cleaned = text.replace(/```json\s*/gi, '').replace(/```/g, '');
-  cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
-  cleaned = cleaned.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
-  cleaned = cleaned.replace(/◁think▷[\s\S]*?◁\/think▷/gi, '');
-  const start = cleaned.indexOf('{');
-  const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1 || start >= end) return null;
-  const jsonStr = cleaned.substring(start, end + 1);
-  try { return JSON.parse(jsonStr); } catch (e) { console.error("JSON 解析失敗：", jsonStr); return null; }
-}
-
-async function fetchWithRetry(base64DataUrl, apiKey, modelId, maxRetries = 2) {
-  const prompt = `你是一個麻將牌辨識專家。請仔細辨識圖片中所有可見的麻將牌，並以嚴格的 JSON 格式回傳，不要加入任何其他文字或 markdown 標記。
-回傳格式範例：
-{"tiles":[{"suit":"wan","num":1},{"suit":"tong","num":5},{"suit":"so","num":9},{"suit":"wind","num":1},{"suit":"dragon","num":1}]}
-規則：
-- suit 只能是 wan（萬）、tong（筒）、so（索）、wind（風）、dragon（三元牌）
-- 風牌 num：1=東、2=南、3=西、4=北
-- 三元牌 num：1=中、2=發、3=白
-- 數字牌 num 為 1~9
-- 只回傳圖片中清楚可見的牌，不要猜測
-- 如果完全看不到麻將牌，回傳 {"tiles":[]}`;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + apiKey,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'Mahjong Counter AI'
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: base64DataUrl } }] }],
-          temperature: 0.1,
-          max_tokens: 512,
-          reasoning: { effort: "none" }
-        })
-      });
-
-      if (!response.ok) {
-        // 502 / 503 / 504 等伺服器端錯誤，適合重試
-        if (response.status >= 500 && response.status <= 504) {
-          throw new Error(`SERVER_ERROR_${response.status}`);
-        }
-        // 429 頻率限制也適合重試
-        if (response.status === 429) {
-          throw new Error(`RATE_LIMIT_429`);
-        }
-        // 其他錯誤（如 400 參數錯誤）不重試，直接拋出
-        const errText = await response.text();
-        throw new Error(`FATAL_${response.status}: ${errText.slice(0, 100)}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || '';
-      
-      // 如果模型回傳空內容，可能是幻覺或伺服器問題，引發重試
-      if (!content) throw new Error('EMPTY_CONTENT');
-
-      const parsed = extractJSON(content);
-      if (!parsed || !Array.isArray(parsed.tiles)) {
-        throw new Error('PARSE_ERROR');
-      }
-
-      return { tiles: parsed.tiles, raw: content, usedModel: modelId };
-
-    } catch (err) {
-      const errorMsg = err.message;
-      console.warn(`[AI 嘗試 ${attempt + 1}/${maxRetries + 1}] 模型 ${modelId} 發生錯誤：`, errorMsg);
-
-      // 如果是最後一次嘗試，或者遇到不可重試的致命錯誤，直接拋出
-      if (attempt === maxRetries || errorMsg.startsWith('FATAL_')) {
-        throw err;
-      }
-      
-      // 根據錯誤類型延遲重試（指數退避）
-      const delay = errorMsg.startsWith('RATE_LIMIT') ? 3000 : Math.min(1000 * Math.pow(2, attempt), 5000);
-      await new Promise(r => setTimeout(r, delay));
-    }
-  }
-}
-
-async function callOpenRouterVision(base64DataUrl, apiKey) {
-  // 依次嘗試備用模型列表
-  for (let i = 0; i < AI_MODELS.length; i++) {
-    const model = AI_MODELS[i];
-    try {
-      if (i > 0) {
-        document.getElementById('aiStatus').textContent = `切換備用模型 (${model.split('/')[1]}) 中...`;
-      }
-      return await fetchWithRetry(base64DataUrl, apiKey, model);
-    } catch (err) {
-      console.error(`模型 ${model} 徹底失敗：`, err.message);
-      if (i === AI_MODELS.length - 1) {
-        // 所有模型都失敗
-        if (err.message.includes('502') || err.message.includes('SERVER_ERROR')) {
-          throw new Error('OpenRouter 與 Nvidia 伺服器目前忙碌或過載 (502)。\n請稍後 1-2 分鐘再試，或檢查 API Key 是否已達免費額度限制。');
-        }
-        throw new Error(`所有免費模型皆無法連線。\n最後錯誤：${err.message}`);
-      }
-    }
-  }
-}
-
-function applyAiResult() {
-  if (aiRecognizedTiles.length === 0) return;
-
-  let addedCount = 0;
-  aiRecognizedTiles.forEach(t => {
-    const allTiles = getAllSelectedTilesForWall();
-    if (allTiles.filter(x => x === t.id).length >= 4) return;
-    closedSection.push(t.id);
-    addedCount++;
-  });
-
-  refreshUI();
-  closeAiPanel();
-  showToast(`已加入 ${addedCount} 張牌到暗手牌區`);
 }
 
 /* ============================================================
@@ -2549,6 +2665,9 @@ function detectPairHighFromMelds(melds) {
   return results;
 }
 
+/* ============================================================
+   混帶X / 全帶X
+   ============================================================ */
 function detectMixedWithXFromMelds(melds, tiles, hand, pair) {
   if (!hand) return [];
   const hasWord = hand.winds.length > 0 || hand.dragons.length > 0;
@@ -3232,29 +3351,6 @@ function renderResultBody(total, detail, variants, activeIdx) {
         </div>
       `).join('')}
     `).join('')}
-    <div class="result-note">
-      ※ 將眼（2/5/8）僅限數字牌（風字眼不計）<br>
-      ※ 全求人（15番）：全部吃、碰或明槓（無暗槓），暗手牌只有 2 張（單釣將眼）<br>
-      ※ 槓牌自動整合至17張牌型計算中，不再重複獨立計算「槓摸」番數<br>
-      ※ 三色/同色步步高、四步高、登天 分明暗、按分支點條數計算、取最高層級；三色已支援全部 6 種花色排列<br>
-      ※ 雜連刻：三雜連刻(10番)、四雜連刻(20番)、五雜連刻(40番)；相鄰刻子不得同色，且必須包含三雜連刻（萬筒索齊集）<br>
-      ※ 清龍 / 雜龍 / 老少 可複式；登天唔計平糊<br>
-      ※ 三相逢：採複式相乘計算（例如 2索×2萬×1筒 = 4組）<br>
-      ※ 全姊妹（30番）：5組順子為 A組×2 + B組×3，達成時不計平糊及姊妹<br>
-      ※ 嚦咕嚦咕（50番）：不計門清；七對一刻或八對半；連對只計每款剛好 2 隻的對子（3 隻不計、4 隻算 2 對），將眼（2/5/8）同步只計每款剛好 2 隻的對子；並計算五門齊/七門齊（10/15 番）及小三元(15)/小三風(10)/小四喜(30)（每款齊 2 隻即可，番數對半）；另加八飛(10番)，不計對碰／獨獨／假獨<br>
-      ※ 雙食嚦咕：若同時組成一般牌型及嚦咕，兩副牌分別計番，顯示【X+Y】，點擊數字可切換查看該副牌番數；花／無花／無字／無字花只由第一副牌計算（第二副一律不計）<br>
-      ※ 雞糊（30番）：必須恰好 1 隻花且全牌無任何其他番數，不計花2番直接計雞糊30番<br>
-      ※ 五門齊：不分大小一律 10 番；七門齊：不分大小一律 15 番（嚦咕嚕咕下亦計算）<br>
-      ※ 缺一門（5番）一定冇字（有風牌或三元牌即不計）<br>
-      ※ 字牌：大三元(40)、小三元(20)、大四喜(100)、小四喜(60)、大三風(30)、小三風(15)、字一色(150，不計全帶幺、對對胡、缺五)<br>
-      ※ 字牌刻子每組 +2 番（自動計算風牌及三元牌刻子）<br>
-      ※ 十六不搭：計十六不搭(50) + 十六飛(10)，不計對碰／獨獨／假獨<br>
-      ※ 十三幺：計十三幺(100) + 十三飛(10)，不計對碰／獨獨／假獨<br>
-      ※ 混帶X／全帶X：將眼可字可數；數字眼須等於X，字牌眼豁免；數字面子須含X，字牌面子豁免；有字→混帶X(30/個)，無字→全帶X(80/個)；多個X分別計算<br>
-      ※ 對碰／獨獨／假獨：由程式根據食胡牌自動判斷（對碰 +2、獨獨 +2、假獨 +1），不再手動按。<br>
-      ※ 食胡牌所在面子：非自摸時視為「明」（影響暗坎、暗龍、暗三相逢、步步高暗條數），自摸時視為「暗」；不影響門清與門清叮 +10。<br>
-      ※ 叮額外規則：一般門清牌型門清叮 +10；十六不搭／十三幺／嚦咕嚦咕等必須門清牌型門清叮只 +5。
-    </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button onclick="saveResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 儲存本局</button>
       <button onclick="closeResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:#16213e;color:#ffd200;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #f7971e55;">返回</button>
@@ -3338,7 +3434,7 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1300);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
 }
 
 renderWall();
