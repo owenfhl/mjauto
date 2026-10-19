@@ -167,7 +167,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .ai-upload-box .ai-icon { font-size: 40px; margin-bottom: 8px; }
 .ai-upload-box .ai-label { font-size: 13px; color: #ccc; }
 .ai-preview img { max-width: 100%; max-height: 240px; border-radius: 8px; margin-bottom: 12px; }
-.ai-status { font-size: 13px; color: #ffd200; text-align: center; min-height: 20px; margin-bottom: 8px; font-weight: bold; }
+.ai-status { font-size: 13px; color: #ffd200; text-align: center; min-height: 20px; margin-bottom: 8px; font-weight: bold; white-space: pre-wrap; }
 .ai-status.error { color: #e74c3c; }
 .ai-result { background:#0f3460; border-radius:8px; padding:10px; font-size:13px; line-height:1.6; word-break:break-all; margin-bottom:12px; display:none; border:1px solid #9b59b6; }
 .ai-result.show { display:block; }
@@ -773,7 +773,7 @@ function switchTab(tab, el) {
 }
 
 /* ============================================================
-   AI 識別牌模組
+   AI 識別牌模組 (包含關閉思考模式與強化 JSON 解析)
    ============================================================ */
 const AI_MODEL = 'nvidia/nemotron-3.5-super-vl:free'; 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -883,6 +883,34 @@ function compressImage(file, maxSize, quality) {
   });
 }
 
+// 增強的 JSON 提取器，處理 Markdown 和思考標籤
+function extractJSON(text) {
+  if (!text) return null;
+  
+  // 1. 移除 Markdown 代碼塊標記
+  let cleaned = text.replace(/```json\s*/gi, '').replace(/```/g, '');
+  
+  // 2. 移除常見的思考標籤
+  cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
+  cleaned = cleaned.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+  cleaned = cleaned.replace(/◁think▷[\s\S]*?◁\/think▷/gi, '');
+
+  // 3. 嘗試提取第一個 { 到最後一個 } 之間的內容
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+  if (start === -1 || end === -1 || start >= end) {
+    return null;
+  }
+  
+  const jsonStr = cleaned.substring(start, end + 1);
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error("JSON 解析失敗，原始內容：", jsonStr);
+    return null;
+  }
+}
+
 async function callOpenRouterVision(base64DataUrl, apiKey) {
   const prompt = `你是一個麻將牌辨識專家。請仔細辨識圖片中所有可見的麻將牌，並以嚴格的 JSON 格式回傳，不要加入任何其他文字或 markdown 標記。
 
@@ -915,7 +943,8 @@ async function callOpenRouterVision(base64DataUrl, apiKey) {
         ]
       }],
       temperature: 0.1,
-      max_tokens: 512
+      max_tokens: 512,
+      reasoning: { effort: "none" } // 👈 強制關閉思考模式
     })
   });
 
@@ -927,20 +956,17 @@ async function callOpenRouterVision(base64DataUrl, apiKey) {
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content || '';
 
-  // 嘗試從回傳內容萃取 JSON
-  const jsonMatch = content.match(/\{[\s\S]*"tiles"[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('AI 回傳格式無法解析：' + content.slice(0, 300));
+  const parsed = extractJSON(content);
+  
+  if (!parsed) {
+    throw new Error('AI 回傳格式無法解析。原始內容：\n' + content.slice(0, 500));
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch (e) {
-    throw new Error('JSON 解析失敗：' + jsonMatch[0].slice(0, 200));
+  if (!parsed.tiles || !Array.isArray(parsed.tiles)) {
+    throw new Error('AI 回傳的 JSON 中找不到 tiles 陣列。原始內容：\n' + content.slice(0, 300));
   }
 
-  const tiles = (parsed.tiles || []).map(item => {
+  const tiles = parsed.tiles.map(item => {
     const suit = String(item.suit || '').toLowerCase();
     const num = parseInt(item.num, 10);
 
