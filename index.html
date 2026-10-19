@@ -92,18 +92,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .toast { position:fixed; bottom:215px; left:50%; transform:translateX(-50%) translateY(20px); background:#ffd200; color:#1a1a2e; font-size:13px; font-weight:800; padding:10px 24px; border-radius:20px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:30000; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-.confirm-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-  z-index: 40000; display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(6px);
-}
+.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 40000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
 .confirm-overlay.show { display: flex; }
-.confirm-box {
-  background: #16213e; border-radius: 14px; padding: 16px;
-  max-width: 420px; width: 94%; border: 1px solid #f7971e55;
-  text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-}
+.confirm-box { background: #16213e; border-radius: 14px; padding: 16px; max-width: 420px; width: 94%; border: 1px solid #f7971e55; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .confirm-box .c-title { font-size: 17px; font-weight: 800; color: #ffd200; margin-bottom: 8px; }
 .confirm-box .c-msg { font-size: 13px; color: #ccc; margin-bottom: 14px; line-height: 1.5; }
 .confirm-box .c-btns { display: flex; gap: 10px; margin-top: 12px; }
@@ -773,10 +764,15 @@ function switchTab(tab, el) {
 }
 
 /* ============================================================
-   AI 識別牌模組 (包含關閉思考模式與強化 JSON 解析)
+   AI 識別牌模組 (包含 502 自動重試與降級機制)
    ============================================================ */
-const AI_MODEL = 'nvidia/nemotron-3.5-super-vl:free'; 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+// 備用模型列表：主模型失敗時會依序嘗試
+const AI_MODELS = [
+  'nvidia/nemotron-3.5-super-vl:free',
+  'google/gemma-4-31b-it:free',
+  'qwen/qwen2.5-vl-72b-instruct:free'
+];
 let aiRecognizedTiles = [];
 
 function getApiKey() {
@@ -844,7 +840,7 @@ async function handleAiImage(event) {
         return;
       }
 
-      statusEl.textContent = `✅ 辨識完成，共 ${aiRecognizedTiles.length} 張牌`;
+      statusEl.textContent = `✅ 辨識完成，共 ${aiRecognizedTiles.length} 張牌 (使用模型: ${result.usedModel.split('/')[1]})`;
       document.getElementById('aiResult').innerHTML = `<span style="color:#ffd200;font-weight:bold;">辨識結果：</span><br>` + 
         aiRecognizedTiles.map(t => TILE_MAP[t.id]?.label || t.id).join(' ');
       document.getElementById('aiResult').classList.add('show');
@@ -883,40 +879,23 @@ function compressImage(file, maxSize, quality) {
   });
 }
 
-// 增強的 JSON 提取器，處理 Markdown 和思考標籤
 function extractJSON(text) {
   if (!text) return null;
-  
-  // 1. 移除 Markdown 代碼塊標記
   let cleaned = text.replace(/```json\s*/gi, '').replace(/```/g, '');
-  
-  // 2. 移除常見的思考標籤
   cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
   cleaned = cleaned.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
   cleaned = cleaned.replace(/◁think▷[\s\S]*?◁\/think▷/gi, '');
-
-  // 3. 嘗試提取第一個 { 到最後一個 } 之間的內容
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1 || start >= end) {
-    return null;
-  }
-  
+  if (start === -1 || end === -1 || start >= end) return null;
   const jsonStr = cleaned.substring(start, end + 1);
-  try {
-    return JSON.parse(jsonStr);
-  } catch (e) {
-    console.error("JSON 解析失敗，原始內容：", jsonStr);
-    return null;
-  }
+  try { return JSON.parse(jsonStr); } catch (e) { console.error("JSON 解析失敗：", jsonStr); return null; }
 }
 
-async function callOpenRouterVision(base64DataUrl, apiKey) {
+async function fetchWithRetry(base64DataUrl, apiKey, modelId, maxRetries = 2) {
   const prompt = `你是一個麻將牌辨識專家。請仔細辨識圖片中所有可見的麻將牌，並以嚴格的 JSON 格式回傳，不要加入任何其他文字或 markdown 標記。
-
 回傳格式範例：
 {"tiles":[{"suit":"wan","num":1},{"suit":"tong","num":5},{"suit":"so","num":9},{"suit":"wind","num":1},{"suit":"dragon","num":1}]}
-
 規則：
 - suit 只能是 wan（萬）、tong（筒）、so（索）、wind（風）、dragon（三元牌）
 - 風牌 num：1=東、2=南、3=西、4=北
@@ -925,65 +904,88 @@ async function callOpenRouterVision(base64DataUrl, apiKey) {
 - 只回傳圖片中清楚可見的牌，不要猜測
 - 如果完全看不到麻將牌，回傳 {"tiles":[]}`;
 
-  const response = await fetch(OPENROUTER_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + apiKey,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': window.location.href,
-      'X-Title': 'Mahjong Counter AI'
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'text', text: prompt },
-          { type: 'image_url', image_url: { url: base64DataUrl } }
-        ]
-      }],
-      temperature: 0.1,
-      max_tokens: 512,
-      reasoning: { effort: "none" } // 👈 強制關閉思考模式
-    })
-  });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'Mahjong Counter AI'
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: base64DataUrl } }] }],
+          temperature: 0.1,
+          max_tokens: 512,
+          reasoning: { effort: "none" }
+        })
+      });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`API 錯誤 ${response.status}：${errText.slice(0, 200)}`);
-  }
+      if (!response.ok) {
+        // 502 / 503 / 504 等伺服器端錯誤，適合重試
+        if (response.status >= 500 && response.status <= 504) {
+          throw new Error(`SERVER_ERROR_${response.status}`);
+        }
+        // 429 頻率限制也適合重試
+        if (response.status === 429) {
+          throw new Error(`RATE_LIMIT_429`);
+        }
+        // 其他錯誤（如 400 參數錯誤）不重試，直接拋出
+        const errText = await response.text();
+        throw new Error(`FATAL_${response.status}: ${errText.slice(0, 100)}`);
+      }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content || '';
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      
+      // 如果模型回傳空內容，可能是幻覺或伺服器問題，引發重試
+      if (!content) throw new Error('EMPTY_CONTENT');
 
-  const parsed = extractJSON(content);
-  
-  if (!parsed) {
-    throw new Error('AI 回傳格式無法解析。原始內容：\n' + content.slice(0, 500));
-  }
+      const parsed = extractJSON(content);
+      if (!parsed || !Array.isArray(parsed.tiles)) {
+        throw new Error('PARSE_ERROR');
+      }
 
-  if (!parsed.tiles || !Array.isArray(parsed.tiles)) {
-    throw new Error('AI 回傳的 JSON 中找不到 tiles 陣列。原始內容：\n' + content.slice(0, 300));
-  }
+      return { tiles: parsed.tiles, raw: content, usedModel: modelId };
 
-  const tiles = parsed.tiles.map(item => {
-    const suit = String(item.suit || '').toLowerCase();
-    const num = parseInt(item.num, 10);
+    } catch (err) {
+      const errorMsg = err.message;
+      console.warn(`[AI 嘗試 ${attempt + 1}/${maxRetries + 1}] 模型 ${modelId} 發生錯誤：`, errorMsg);
 
-    let id = null;
-    if (suit === 'wan' && num >= 1 && num <= 9) id = `wan${num}`;
-    else if (suit === 'tong' && num >= 1 && num <= 9) id = `tong${num}`;
-    else if (suit === 'so' && num >= 1 && num <= 9) id = `so${num}`;
-    else if (suit === 'wind' && num >= 1 && num <= 4) {
-      id = ['east', 'south', 'west', 'north'][num - 1];
-    } else if (suit === 'dragon' && num >= 1 && num <= 3) {
-      id = ['chung', 'fat', 'bak'][num - 1];
+      // 如果是最後一次嘗試，或者遇到不可重試的致命錯誤，直接拋出
+      if (attempt === maxRetries || errorMsg.startsWith('FATAL_')) {
+        throw err;
+      }
+      
+      // 根據錯誤類型延遲重試（指數退避）
+      const delay = errorMsg.startsWith('RATE_LIMIT') ? 3000 : Math.min(1000 * Math.pow(2, attempt), 5000);
+      await new Promise(r => setTimeout(r, delay));
     }
+  }
+}
 
-    return id ? { id, section: 'closed' } : null;
-  }).filter(Boolean);
-
-  return { tiles, raw: content };
+async function callOpenRouterVision(base64DataUrl, apiKey) {
+  // 依次嘗試備用模型列表
+  for (let i = 0; i < AI_MODELS.length; i++) {
+    const model = AI_MODELS[i];
+    try {
+      if (i > 0) {
+        document.getElementById('aiStatus').textContent = `切換備用模型 (${model.split('/')[1]}) 中...`;
+      }
+      return await fetchWithRetry(base64DataUrl, apiKey, model);
+    } catch (err) {
+      console.error(`模型 ${model} 徹底失敗：`, err.message);
+      if (i === AI_MODELS.length - 1) {
+        // 所有模型都失敗
+        if (err.message.includes('502') || err.message.includes('SERVER_ERROR')) {
+          throw new Error('OpenRouter 與 Nvidia 伺服器目前忙碌或過載 (502)。\n請稍後 1-2 分鐘再試，或檢查 API Key 是否已達免費額度限制。');
+        }
+        throw new Error(`所有免費模型皆無法連線。\n最後錯誤：${err.message}`);
+      }
+    }
+  }
 }
 
 function applyAiResult() {
@@ -992,7 +994,7 @@ function applyAiResult() {
   let addedCount = 0;
   aiRecognizedTiles.forEach(t => {
     const allTiles = getAllSelectedTilesForWall();
-    if (allTiles.filter(x => x === t.id).length >= 4) return; // 每張牌上限 4 隻
+    if (allTiles.filter(x => x === t.id).length >= 4) return;
     closedSection.push(t.id);
     addedCount++;
   });
