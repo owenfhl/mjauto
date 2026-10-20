@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>多狗計數機 · AI辨牌 2026</title>
+<title>多仔港式台牌 自動算番 2026</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans TC", sans-serif; background:#1a1a2e; color:#eee; min-height:100vh; padding:8px; padding-bottom:190px; user-select:none; }
@@ -60,13 +60,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .hand-tile .honor.black { color:#333; }
 .hand-tile img { width:100%; height:100%; object-fit:contain; border-radius:3px; pointer-events:none; }
 
-.hand-actions { display:flex; gap:6px; position:relative; z-index:10000; flex-wrap:wrap; }
-.hand-actions button { flex:1; padding:10px 6px; border-radius:8px; border:none; font-size:12px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; }
+.hand-actions { display:flex; gap:5px; position:relative; z-index:10000; }
+.hand-actions button { flex:1; padding:10px 4px; border-radius:8px; border:none; font-size:12px; font-weight:800; cursor:pointer; pointer-events:auto; transition:transform 0.1s; white-space:nowrap; }
 .hand-actions button:active { transform:scale(0.95); }
-.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); }
-.btn-clear { background:#e74c3c; color:#fff; flex:0.6; }
-.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.7; }
-.btn-ai { background:linear-gradient(135deg,#8e44ad,#9b59b6); color:#fff; box-shadow:0 2px 8px rgba(142,68,173,0.4); flex:0.8; }
+.btn-calc { background:linear-gradient(135deg,#f7971e,#ffd200); color:#1a1a2e; box-shadow:0 2px 8px rgba(247,151,30,0.4); flex:1.1; }
+.btn-ai { background:linear-gradient(135deg,#8e44ad,#3498db); color:#fff; box-shadow:0 2px 8px rgba(142,68,173,0.4); flex:0.85; }
+.btn-clear { background:#e74c3c; color:#fff; flex:0.55; }
+.btn-history2 { background:#16213e; color:#ffd200; border:1px solid #f7971e55 !important; flex:0.65; }
 
 .result-panel { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:20000; display:none; flex-direction:column; backdrop-filter:blur(8px); }
 .result-panel.show { display:flex; }
@@ -88,12 +88,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .history-item .h-detail { font-size:11px; color:#999; margin-top:4px; line-height:1.6; }
 .history-item .h-time { font-size:10px; color:#666; margin-top:4px; }
 .empty-state { text-align:center; color:#555; padding:40px 20px; font-size:14px; }
-.toast { position:fixed; bottom:215px; left:50%; transform:translateX(-50%) translateY(20px); background:#ffd200; color:#1a1a2e; font-size:13px; font-weight:800; padding:10px 24px; border-radius:20px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:30000; white-space:nowrap; }
+.toast { position:fixed; bottom:215px; left:50%; transform:translateX(-50%) translateY(20px); background:#ffd200; color:#1a1a2e; font-size:13px; font-weight:800; padding:10px 24px; border-radius:20px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:50000; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 40000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 40000; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+}
 .confirm-overlay.show { display: flex; }
-.confirm-box { background: #16213e; border-radius: 14px; padding: 16px; max-width: 420px; width: 94%; border: 1px solid #f7971e55; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.confirm-box {
+  background: #16213e; border-radius: 14px; padding: 16px;
+  max-width: 420px; width: 94%; border: 1px solid #f7971e55;
+  text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
 .confirm-box .c-title { font-size: 17px; font-weight: 800; color: #ffd200; margin-bottom: 8px; }
 .confirm-box .c-msg { font-size: 13px; color: #ccc; margin-bottom: 14px; line-height: 1.5; }
 .confirm-box .c-btns { display: flex; gap: 10px; margin-top: 12px; }
@@ -144,42 +153,33 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
 .confirm-bonus { background:#0f3460; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; max-height:260px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .confirm-bonus .cf-title { font-size:13px; font-weight:800; color:#ffd200; margin-bottom:8px; }
 
-/* AI 辨識相關樣式 */
-.ai-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 50000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-.ai-overlay.show { display: flex; }
-.ai-box { background: #16213e; border-radius: 16px; padding: 20px; max-width: 440px; width: 94%; border: 1px solid #9b59b6; text-align: center; box-shadow: 0 10px 50px rgba(155,89,182,0.3); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.ai-box .ai-title { font-size: 18px; font-weight: 800; color: #d4a5f5; margin-bottom: 6px; }
-.ai-box .ai-sub { font-size: 12px; color: #888; margin-bottom: 14px; line-height: 1.5; }
-.ai-preview { width: 100%; min-height: 160px; max-height: 260px; border-radius: 10px; background: #0a0a1a; border: 2px dashed #9b59b6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 12px; position: relative; }
-.ai-preview img { width: 100%; height: 100%; object-fit: contain; }
-.ai-preview .ai-placeholder { color: #555; font-size: 13px; padding: 20px; }
-.ai-preview input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.ai-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-.ai-actions button { flex: 1; padding: 14px 10px; border-radius: 12px; border: none; font-size: 15px; font-weight: 800; cursor: pointer; transition: transform 0.1s; min-width: 100px; }
-.ai-actions button:active { transform: scale(0.95); }
-.ai-btn-upload { background: linear-gradient(135deg,#8e44ad,#9b59b6); color: #fff; }
-.ai-btn-detect { background: linear-gradient(135deg,#27ae60,#1e8449); color: #fff; }
-.ai-btn-cancel { background: #16213e; color: #ffd200; border: 1px solid #f7971e55 !important; flex: 0.5; }
-.ai-status { font-size: 12px; color: #d4a5f5; margin-top: 10px; padding: 8px; background: #0a0a1a; border-radius: 8px; min-height: 20px; border: 1px solid #9b59b644; }
-.ai-result-list { margin-top: 10px; text-align: left; max-height: 200px; overflow-y: auto; }
-.ai-result-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #0f3460; border-radius: 6px; margin-bottom: 4px; font-size: 12px; border-left: 3px solid #9b59b6; }
-.ai-result-item .tile-mini { width: 32px; height: 44px; background: #f5f5f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; border: 1px solid #b8b0a0; flex-shrink: 0; }
-.ai-result-item .tile-mini img { width: 100%; height: 100%; object-fit: contain; border-radius: 3px; }
-.ai-result-item .tile-mini .red { color:#cc2222; }
-.ai-result-item .tile-mini .green { color:#228822; }
-.ai-result-item .tile-mini .blue { color:#2222cc; }
-.ai-result-item .tile-mini .black { color:#333; }
-.ai-result-item .tile-name { flex: 1; color: #ccc; }
-.ai-result-item .tile-section { color: #ffd200; font-weight: 700; font-size: 11px; }
-.ai-loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #9b59b644; border-top-color: #9b59b6; border-radius: 50%; animation: ai-spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-@keyframes ai-spin { to { transform: rotate(360deg); } }
+/* 智譜 AI 識牌彈窗樣式 */
+.ai-field { background:#0f3460; border-radius:8px; padding:10px; margin-bottom:10px; border:1px solid #1a4a7a; text-align:left; }
+.ai-field label { display:block; font-size:11px; font-weight:800; color:#ffd200; margin-bottom:5px; }
+.ai-input-row { display:flex; gap:6px; }
+.ai-input { flex:1; padding:8px 10px; border-radius:6px; border:1px solid #2a5a8a; background:#16213e; color:#fff; font-size:12px; outline:none; }
+.ai-input:focus { border-color:#ffd200; }
+.ai-select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #2a5a8a; background:#16213e; color:#fff; font-size:12px; outline:none; margin-top:6px; }
+.ai-small-btn { padding:8px 10px; border-radius:6px; border:1px solid #f7971e88; background:#16213e; color:#ffd200; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.ai-upload-btns { display:flex; gap:8px; margin-bottom:8px; }
+.ai-upload-btn { flex:1; padding:12px 8px; border-radius:8px; border:1px dashed #3498db; background:#16213e; color:#eee; font-size:12px; font-weight:800; cursor:pointer; text-align:center; }
+.ai-upload-btn:active { transform:scale(0.97); }
+.ai-preview-wrap { display:none; margin-top:8px; text-align:center; position:relative; }
+.ai-preview-wrap.show { display:block; }
+.ai-preview-img { max-width:100%; max-height:170px; border-radius:8px; border:1px solid #ffd20088; object-fit:contain; }
+.ai-mode-switch { display:flex; gap:6px; margin-top:6px; }
+.ai-mode-opt { flex:1; padding:7px 4px; border-radius:6px; background:#16213e; border:1px solid #1a4a7a; color:#999; font-size:11px; font-weight:700; cursor:pointer; text-align:center; }
+.ai-mode-opt.active { background:#f7971e; color:#1a1a2e; border-color:#ffd200; }
+.ai-status { font-size:12px; color:#ffd200; margin:8px 0; min-height:18px; font-weight:700; }
+.c-btn-ai-go { background:linear-gradient(135deg,#8e44ad,#3498db); color:#fff; }
+.c-btn-ai-go:disabled { opacity:0.45; cursor:not-allowed; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1> 多狗計數機 </h1>
-  <p>2026修正版v3 · AI辨牌</p>
+  <p>2026修正版v3（智譜 AI 識牌版）</p>
 </div>
 
 <div class="tabs">
@@ -224,7 +224,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   
   <div class="hand-actions">
     <button class="btn-calc" onclick="openCalcConfirm()">🧮 計算番數</button>
-    <button class="btn-ai" onclick="openAIPanel()">🤖 AI辨牌</button>
+    <button class="btn-ai" onclick="openAiPanel()">📷 AI 識牌</button>
     <button class="btn-clear" onclick="clearHand()">🗑 清空</button>
     <button class="btn-history2" onclick="toggleHistory()">📋 紀錄 (<span id="historyCount">0</span>)</button>
   </div>
@@ -246,6 +246,57 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   <div class="result-body">
     <div class="history-list" id="historyList">
       <div class="empty-state">暫無紀錄</div>
+    </div>
+  </div>
+</div>
+
+<!-- 智譜 AI 識牌彈窗 -->
+<div class="confirm-overlay" id="aiModalOverlay">
+  <div class="confirm-box">
+    <div class="c-title">📷 智譜 AI 自動辨識麻雀</div>
+    <div class="c-msg" style="margin-bottom:10px;">拍攝或上傳麻雀相片，由智譜視覺模型自動填入牌組</div>
+
+    <div class="ai-field">
+      <label>🔑 智譜 AI API Key（自動儲存於本機瀏覽器）</label>
+      <div class="ai-input-row">
+        <input type="password" id="zhipuApiKeyInput" class="ai-input" placeholder="請輸入智譜 open.bigmodel.cn API Key">
+        <button class="ai-small-btn" onclick="toggleApiKeyVisibility()">👁️</button>
+        <button class="ai-small-btn" onclick="saveZhipuApiKey()">儲存</button>
+      </div>
+      <select id="zhipuModelSelect" class="ai-select" onchange="saveZhipuModel()">
+        <option value="glm-4v-flash">⚡ GLM-4V-Flash（免費・極速推薦）</option>
+        <option value="glm-4.6v">🚀 GLM-4.6V（高精度視覺模型）</option>
+        <option value="glm-4.5v">🎯 GLM-4.5V（視覺推理模型）</option>
+        <option value="glm-4v-plus">💎 GLM-4V-Plus（增強版視覺模型）</option>
+      </select>
+    </div>
+
+    <div class="ai-field">
+      <label>📥 匯入模式</label>
+      <div class="ai-mode-switch">
+        <div class="ai-mode-opt active" id="aiModeAuto" onclick="setAiImportMode('auto')">⚡ 整副牌自動分區<br><span style="font-size:9px;font-weight:400;">自動分暗牌/明牌/槓/花並覆蓋</span></div>
+        <div class="ai-mode-opt" id="aiModeTarget" onclick="setAiImportMode('target')">➕ 僅加入目前選中分區<br><span style="font-size:9px;font-weight:400;">追加至當前「暗/明/槓」區</span></div>
+      </div>
+    </div>
+
+    <div class="ai-field">
+      <label>🖼️ 選擇麻雀相片（請盡量保持牌面清晰正面）</label>
+      <input type="file" id="aiCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleAiImageSelect(event)">
+      <input type="file" id="aiGalleryInput" accept="image/*" style="display:none" onchange="handleAiImageSelect(event)">
+      <div class="ai-upload-btns">
+        <div class="ai-upload-btn" onclick="document.getElementById('aiCameraInput').click()">📸 即時影相</div>
+        <div class="ai-upload-btn" onclick="document.getElementById('aiGalleryInput').click()">🖼️ 相簿揀相</div>
+      </div>
+      <div class="ai-preview-wrap" id="aiPreviewWrap">
+        <img id="aiPreviewImg" class="ai-preview-img" src="" alt="預覽">
+      </div>
+    </div>
+
+    <div class="ai-status" id="aiStatusText"></div>
+
+    <div class="c-btns">
+      <button class="c-btn-ai-go" id="aiStartBtn" onclick="runZhipuVisionRecognition()">🤖 開始 AI 辨識</button>
+      <button class="c-btn-no" onclick="closeAiPanel()">關閉</button>
     </div>
   </div>
 </div>
@@ -359,33 +410,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans
   </div>
 </div>
 
-<!-- AI 辨識面板 -->
-<div class="ai-overlay" id="aiOverlay">
-  <div class="ai-box">
-    <div class="ai-title">🤖 AI 辨牌</div>
-    <div class="ai-sub">上傳或拍攝手牌照片，智譜 AI 會自動辨識牌型</div>
-
-    <div class="ai-preview" id="aiPreview" onclick="document.getElementById('aiFileInput').click()">
-      <div class="ai-placeholder" id="aiPlaceholder">📷 點擊上傳或拍攝手牌照片</div>
-      <input type="file" id="aiFileInput" accept="image/*" capture="environment" onchange="handleAIImage(event)">
-    </div>
-
-    <div class="ai-status" id="aiStatus">等待上傳圖片⋯</div>
-
-    <div class="ai-result-list" id="aiResultList"></div>
-
-    <div class="ai-actions">
-      <button class="ai-btn-upload" onclick="document.getElementById('aiFileInput').click()">📷 選擇圖片</button>
-      <button class="ai-btn-detect" id="aiDetectBtn" onclick="runAIDetect()" disabled>🔍 開始辨識</button>
-      <button class="ai-btn-cancel" onclick="closeAIPanel()">取消</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== 原有常量與數據 ====================
 const TILE_DEFS = [];
 for (let i=1;i<=9;i++) TILE_DEFS.push({ suit:'wan', num:i, id:`wan${i}`, label:i, type:'num', color:'red', img:`mjphoto/${i}m.png` });
 for (let i=1;i<=9;i++) TILE_DEFS.push({ suit:'tong', num:i, id:`tong${i}`, label:i, type:'num', color:'blue', img:`mjphoto/${i}p.png` });
@@ -400,6 +427,283 @@ TILE_DEFS.push({ suit:'dragon', num:3, id:'bak',   label:'白', type:'honor', co
 
 const TILE_MAP = {};
 TILE_DEFS.forEach(t => TILE_MAP[t.id] = t);
+
+/* ==================== 智譜 AI 識牌模組 ==================== */
+let aiImportMode = 'auto';
+let aiImageBase64DataUrl = null;
+
+function initZhipuConfig() {
+  const savedKey = localStorage.getItem('ZHIPU_API_KEY') || '';
+  const savedModel = localStorage.getItem('ZHIPU_MODEL') || 'glm-4v-flash';
+  const keyInput = document.getElementById('zhipuApiKeyInput');
+  const modelSelect = document.getElementById('zhipuModelSelect');
+  if (keyInput) keyInput.value = savedKey;
+  if (modelSelect) modelSelect.value = savedModel;
+}
+
+function openAiPanel() {
+  initZhipuConfig();
+  document.getElementById('aiStatusText').textContent = '';
+  document.getElementById('aiModalOverlay').classList.add('show');
+}
+
+function closeAiPanel() {
+  document.getElementById('aiModalOverlay').classList.remove('show');
+}
+
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('zhipuApiKeyInput');
+  input.type = (input.type === 'password') ? 'text' : 'password';
+}
+
+function saveZhipuApiKey() {
+  const key = document.getElementById('zhipuApiKeyInput').value.trim();
+  localStorage.setItem('ZHIPU_API_KEY', key);
+  showToast(key ? '已儲存智譜 API Key' : '已清除 API Key');
+}
+
+function saveZhipuModel() {
+  const model = document.getElementById('zhipuModelSelect').value;
+  localStorage.setItem('ZHIPU_MODEL', model);
+}
+
+function setAiImportMode(mode) {
+  aiImportMode = mode;
+  document.getElementById('aiModeAuto').classList.toggle('active', mode === 'auto');
+  document.getElementById('aiModeTarget').classList.toggle('active', mode === 'target');
+}
+
+function handleAiImageSelect(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('aiStatusText');
+  statusEl.textContent = '⏳ 正在壓縮及載入圖片...';
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const img = new Image();
+    img.onload = function() {
+      const maxDim = 1280;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      aiImageBase64DataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+      const previewImg = document.getElementById('aiPreviewImg');
+      previewImg.src = aiImageBase64DataUrl;
+      document.getElementById('aiPreviewWrap').classList.add('show');
+      statusEl.textContent = '✅ 圖片已就緒，請按「開始 AI 辨識」';
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function normalizeAiTileToken(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim().toLowerCase();
+  if (TILE_MAP[s]) return s;
+
+  const aliasMap = {
+    '1m':'wan1','2m':'wan2','3m':'wan3','4m':'wan4','5m':'wan5','6m':'wan6','7m':'wan7','8m':'wan8','9m':'wan9',
+    '一萬':'wan1','二萬':'wan2','三萬':'wan3','四萬':'wan4','五萬':'wan5','六萬':'wan6','七萬':'wan7','八萬':'wan8','九萬':'wan9',
+    '1萬':'wan1','2萬':'wan2','3萬':'wan3','4萬':'wan4','5萬':'wan5','6萬':'wan6','7萬':'wan7','8萬':'wan8','9萬':'wan9',
+    '1p':'tong1','2p':'tong2','3p':'tong3','4p':'tong4','5p':'tong5','6p':'tong6','7p':'tong7','8p':'tong8','9p':'tong9',
+    '一筒':'tong1','二筒':'tong2','三筒':'tong3','四筒':'tong4','五筒':'tong5','六筒':'tong6','七筒':'tong7','八筒':'tong8','九筒':'tong9',
+    '1筒':'tong1','2筒':'tong2','3筒':'tong3','4筒':'tong4','5筒':'tong5','6筒':'tong6','7筒':'tong7','8筒':'tong8','9筒':'tong9',
+    '一餅':'tong1','二餅':'tong2','三餅':'tong3','四餅':'tong4','五餅':'tong5','六餅':'tong6','七餅':'tong7','八餅':'tong8','九餅':'tong9',
+    '1s':'so1','2s':'so2','3s':'so3','4s':'so4','5s':'so5','6s':'so6','7s':'so7','8s':'so8','9s':'so9',
+    '一索':'so1','二索':'so2','三索':'so3','四索':'so4','五索':'so5','六索':'so6','七索':'so7','八索':'so8','九索':'so9',
+    '1索':'so1','2索':'so2','3索':'so3','4索':'so4','5索':'so5','6索':'so6','7索':'so7','8索':'so8','9索':'so9',
+    '一條':'so1','二條':'so2','三條':'so3','四條':'so4','五條':'so5','六條':'so6','七條':'so7','八條':'so8','九條':'so9',
+    '1條':'so1','2條':'so2','3條':'so3','4條':'so4','5條':'so5','6條':'so6','7條':'so7','8條':'so8','9條':'so9',
+    '東':'east','東風':'east','1z':'east',
+    '南':'south','南風':'south','2z':'south',
+    '西':'west','西風':'west','3z':'west',
+    '北':'north','北風':'north','4z':'north',
+    '中':'chung','紅中':'chung','7z':'chung',
+    '發':'fat','發財':'fat','青發':'fat','6z':'fat',
+    '白':'bak','白板':'bak','5z':'bak'
+  };
+  return aliasMap[s] || aliasMap[String(raw).trim()] || null;
+}
+
+async function runZhipuVisionRecognition() {
+  const apiKey = document.getElementById('zhipuApiKeyInput').value.trim();
+  const model = document.getElementById('zhipuModelSelect').value;
+  const statusEl = document.getElementById('aiStatusText');
+  const startBtn = document.getElementById('aiStartBtn');
+
+  if (!apiKey) {
+    showToast('請先輸入智譜 AI API Key');
+    statusEl.textContent = '❌ 請先填寫智譜 API Key';
+    return;
+  }
+  if (!aiImageBase64DataUrl) {
+    showToast('請先影相或揀選麻雀相片');
+    statusEl.textContent = '❌ 請先選擇麻雀相片';
+    return;
+  }
+
+  localStorage.setItem('ZHIPU_API_KEY', apiKey);
+  localStorage.setItem('ZHIPU_MODEL', model);
+
+  startBtn.disabled = true;
+  statusEl.textContent = `🤖 正在呼叫智譜 ${model} 辨識麻雀中...`;
+
+  const promptText = `你是一個專業的港式台灣麻雀（17張）視覺辨識助手。請仔細觀察圖片中的所有麻雀牌，並轉換為嚴格的 JSON 格式輸出。
+
+【牌張代號規範】
+- 萬子：wan1, wan2, wan3, wan4, wan5, wan6, wan7, wan8, wan9
+- 筒子（餅）：tong1, tong2, tong3, tong4, tong5, tong6, tong7, tong8, tong9
+- 索子（條，1索為雀鳥圖案）：so1, so2, so3, so4, so5, so6, so7, so8, so9
+- 風牌：east (東), south (南), west (西), north (北)
+- 三元牌：chung (紅中), fat (發財), bak (白板/藍框白牌)
+
+【分區規則】
+1. closed：暗手牌（通常立起面向玩家，或排成主牌列）。如有最後一張食胡牌，請放在 closed 陣列的最後一項。
+2. open：明手牌（已攤開平放的 3 張順子或刻子，全部展開逐張列出，例如 ["wan1","wan2","wan3"]）。如果圖片所有牌都平放且無明顯分區，請全部放入 closed。
+3. kongs：槓牌（4張相同的槓牌，格式為 [{"id":"east","type":"open"}] 或 [{"id":"east","type":"closed"}]，只需填 1 個物件代表該組槓）。
+4. redFlowers：紅字花牌（春、夏、秋、冬 或 1-4 紅花）的張數（0~4 整數）。
+5. blueFlowers：藍/綠字花牌（梅、蘭、竹、菊 或 1-4 藍花）的張數（0~4 整數）。
+
+請只輸出純 JSON 物件，不要包含任何解釋或 Markdown 語法：
+{"closed":[],"open":[],"kongs":[],"redFlowers":0,"blueFlowers":0}`;
+
+  try {
+    const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        temperature: 0.1,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: aiImageBase64DataUrl } },
+              { type: 'text', text: promptText }
+            ]
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP 錯誤 (${response.status})`);
+    }
+
+    const data = await response.json();
+    const rawContent = data?.choices?.[0]?.message?.content || '';
+    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('AI 回傳格式無法解析：' + rawContent.slice(0, 80));
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    applyAiRecognizedResult(parsed);
+  } catch (err) {
+    console.error('Zhipu AI Error:', err);
+    statusEl.textContent = '❌ 辨識失敗：' + err.message;
+    showToast('AI 辨識失敗：' + err.message);
+  } finally {
+    startBtn.disabled = false;
+  }
+}
+
+function applyAiRecognizedResult(parsed) {
+  const closedArr = Array.isArray(parsed.closed) ? parsed.closed.map(normalizeAiTileToken).filter(Boolean) : [];
+  const openArr = Array.isArray(parsed.open) ? parsed.open.map(normalizeAiTileToken).filter(Boolean) : [];
+  const kongsArr = Array.isArray(parsed.kongs) ? parsed.kongs : [];
+
+  if (aiImportMode === 'auto') {
+    openSection = [];
+    closedSection = [];
+    kongSection = [];
+    const usedCounts = {};
+
+    kongsArr.forEach(k => {
+      const id = normalizeAiTileToken(typeof k === 'string' ? k : k?.id);
+      const kType = (k && k.type === 'open') ? 'open' : 'closed';
+      if (id && (usedCounts[id] || 0) === 0) {
+        kongSection.push({ id, type: kType });
+        usedCounts[id] = 4;
+      }
+    });
+
+    openArr.forEach(id => {
+      if ((usedCounts[id] || 0) < 4) {
+        openSection.push(id);
+        usedCounts[id] = (usedCounts[id] || 0) + 1;
+      }
+    });
+
+    closedArr.forEach(id => {
+      if ((usedCounts[id] || 0) < 4) {
+        closedSection.push(id);
+        usedCounts[id] = (usedCounts[id] || 0) + 1;
+      }
+    });
+
+    if (typeof parsed.redFlowers === 'number') {
+      redFlowerCount = Math.min(4, Math.max(0, Math.round(parsed.redFlowers)));
+    }
+    if (typeof parsed.blueFlowers === 'number') {
+      blueFlowerCount = Math.min(4, Math.max(0, Math.round(parsed.blueFlowers)));
+    }
+
+    refreshUI();
+    closeAiPanel();
+    const totalCalc = openSection.length + closedSection.length + (kongSection.length * 3);
+    showToast(`AI 識牌完成：共 ${totalCalc} 張計數牌 (花:${redFlowerCount + blueFlowerCount})`);
+  } else {
+    const allRecognized = [...closedArr, ...openArr];
+    kongsArr.forEach(k => {
+      const id = normalizeAiTileToken(typeof k === 'string' ? k : k?.id);
+      if (id) allRecognized.push(id);
+    });
+
+    let addedCount = 0;
+    if (targetSection === 'kong') {
+      const uniqueIds = [...new Set(allRecognized)];
+      uniqueIds.forEach(id => {
+        const currentUsed = getAllSelectedTilesForWall().filter(x => x === id).length;
+        if (currentUsed === 0) {
+          kongSection.push({ id, type: currentKongType });
+          addedCount++;
+        }
+      });
+    } else {
+      allRecognized.forEach(id => {
+        const currentUsed = getAllSelectedTilesForWall().filter(x => x === id).length;
+        if (currentUsed < 4) {
+          if (targetSection === 'open') openSection.push(id);
+          else closedSection.push(id);
+          addedCount++;
+        }
+      });
+    }
+
+    refreshUI();
+    closeAiPanel();
+    showToast(`已加入 ${addedCount} 項至${targetSection === 'closed' ? '暗手牌' : targetSection === 'open' ? '明手牌' : '槓區'}`);
+  }
+}
+/* ==================== 智譜 AI 識牌模組結束 ==================== */
 
 const FAN_TABLE = [
   { id:'eachFlower', name:'花', fan:2, cat:'花摸' },
@@ -566,20 +870,27 @@ let cfBlue = 0;
 let cfSelectedTile = null;
 let cfBonusState = {};
 
-// ==================== 核心 UI 函數 ====================
 function showConfirm(title, msg, onYes) {
   const overlay = document.getElementById('confirmOverlay');
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMsg').textContent = msg;
   overlay.classList.add('show');
+  
   const yesBtn = document.getElementById('confirmYes');
   const noBtn = document.getElementById('confirmNo');
+  
   const newYes = yesBtn.cloneNode(true);
   const newNo = noBtn.cloneNode(true);
   yesBtn.parentNode.replaceChild(newYes, yesBtn);
   noBtn.parentNode.replaceChild(newNo, noBtn);
-  newYes.addEventListener('click', () => { overlay.classList.remove('show'); if (onYes) onYes(); });
-  newNo.addEventListener('click', () => { overlay.classList.remove('show'); });
+  
+  newYes.addEventListener('click', () => {
+    overlay.classList.remove('show');
+    if (onYes) onYes();
+  });
+  newNo.addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
 }
 
 function setTargetSection(sec, el) {
@@ -620,7 +931,12 @@ function renderWall() {
   ];
   container.innerHTML = suits.map(s => {
     const tiles = TILE_DEFS.filter(t => t.suit === s.key);
-    return `<div class="suit-row"><div class="suit-label">${s.label}</div><div class="tiles-row">${tiles.map(t => renderTileHTML(t)).join('')}</div></div>`;
+    return `
+      <div class="suit-row">
+        <div class="suit-label">${s.label}</div>
+        <div class="tiles-row">${tiles.map(t => renderTileHTML(t)).join('')}</div>
+      </div>
+    `;
   }).join('');
 }
 
@@ -629,22 +945,39 @@ function renderTileHTML(t) {
   const used = allTiles.filter(id => id === t.id).length;
   const usedClass = used >= 4 ? 'used' : '';
   const badge = used > 0 ? `<span class="badge">${used}</span>` : '';
-  const inner = t.img ? `<img src="${t.img}" alt="${t.label}">` : (t.type === 'num' ? `<span class="num ${t.color || 'black'}">${t.label}</span>` : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
+  const inner = t.img
+    ? `<img src="${t.img}" alt="${t.label}">`
+    : (t.type === 'num'
+        ? `<span class="num ${t.color || 'black'}">${t.label}</span>`
+        : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
   return `<div class="tile ${usedClass}" onclick="addTileToTarget('${t.id}')">${badge}${inner}</div>`;
 }
 
 function addTileToTarget(id) {
   const allTiles = getAllSelectedTilesForWall();
   const count = allTiles.filter(x => x === id).length;
+  
   if (targetSection === 'kong') {
-    if (count > 0) { showToast('槓牌必須為完整 4 隻，不可與手牌混用或超過上限'); return; }
+    if (count > 0) {
+      showToast('槓牌必須為完整 4 隻，不可與手牌混用或超過上限');
+      return;
+    }
     kongSection.push({ id: id, type: currentKongType });
     refreshUI();
     return;
   }
-  if (count >= 4) { showToast('每張牌最多 4 隻'); return; }
-  if (targetSection === 'open') openSection.push(id);
-  else closedSection.push(id);
+
+  if (count >= 4) {
+    showToast('每張牌最多 4 隻');
+    return;
+  }
+
+  if (targetSection === 'open') {
+    openSection.push(id);
+  } else {
+    closedSection.push(id);
+  }
+
   refreshUI();
 }
 
@@ -656,9 +989,17 @@ function removeFromSection(sectionName, index) {
 }
 
 function clearHand() {
-  if (getAllSelectedTilesForWall().length === 0 && (redFlowerCount + blueFlowerCount) === 0) { showToast('已經係空白'); return; }
+  if (getAllSelectedTilesForWall().length === 0 && (redFlowerCount + blueFlowerCount) === 0) {
+    showToast('已經係空白');
+    return;
+  }
+  
   showConfirm('確定清空？', '所有牌組配置將會被清除', () => {
-    redFlowerCount = 0; blueFlowerCount = 0; openSection = []; closedSection = []; kongSection = [];
+    redFlowerCount = 0;
+    blueFlowerCount = 0;
+    openSection = [];
+    closedSection = [];
+    kongSection = [];
     refreshUI();
     document.getElementById('resultContainer').innerHTML = '<div class="empty-state">請先配置牌組<br>然後按「計算番數」</div>';
     switchTab('wall', document.querySelector('.tab'));
@@ -673,24 +1014,40 @@ function refreshUI() {
 
 function renderSections() {
   document.getElementById('closedCount').textContent = closedSection.length;
-  document.getElementById('closedTiles').innerHTML = closedSection.length === 0 ? '<div class="empty-hint">無</div>' : closedSection.map((id, i) => renderHandTileHTML(id, 'closed', i)).join('');
+  document.getElementById('closedTiles').innerHTML = closedSection.length === 0 
+    ? '<div class="empty-hint">無</div>' 
+    : closedSection.map((id, i) => renderHandTileHTML(id, 'closed', i)).join('');
+
   document.getElementById('openCount').textContent = openSection.length;
-  document.getElementById('openTiles').innerHTML = openSection.length === 0 ? '<div class="empty-hint">無</div>' : openSection.map((id, i) => renderHandTileHTML(id, 'open', i)).join('');
+  document.getElementById('openTiles').innerHTML = openSection.length === 0 
+    ? '<div class="empty-hint">無</div>' 
+    : openSection.map((id, i) => renderHandTileHTML(id, 'open', i)).join('');
+
   document.getElementById('kongCount').textContent = kongSection.length;
-  document.getElementById('kongTiles').innerHTML = kongSection.length === 0 ? '<div class="empty-hint">只需點1張</div>' : kongSection.map((k, i) => renderKongTileHTML(k, i)).join('');
+  document.getElementById('kongTiles').innerHTML = kongSection.length === 0 
+    ? '<div class="empty-hint">只需點1張</div>' 
+    : kongSection.map((k, i) => renderKongTileHTML(k, i)).join('');
 }
 
 function renderHandTileHTML(id, secName, index) {
   const t = TILE_MAP[id];
   if (!t) return '';
-  const inner = t.img ? `<img src="${t.img}" alt="${t.label}">` : (t.type === 'num' ? `<span class="num ${t.color || 'black'}">${t.label}</span>` : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
+  const inner = t.img
+    ? `<img src="${t.img}" alt="${t.label}">`
+    : (t.type === 'num'
+        ? `<span class="num ${t.color || 'black'}">${t.label}</span>`
+        : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
   return `<div class="hand-tile" onclick="removeFromSection('${secName}', ${index})">${inner}</div>`;
 }
 
 function renderKongTileHTML(k, index) {
   const t = TILE_MAP[k.id];
   if (!t) return '';
-  const inner = t.img ? `<img src="${t.img}" alt="${t.label}">` : (t.type === 'num' ? `<span class="num ${t.color || 'black'}">${t.label}</span>` : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
+  const inner = t.img
+    ? `<img src="${t.img}" alt="${t.label}">`
+    : (t.type === 'num'
+        ? `<span class="num ${t.color || 'black'}">${t.label}</span>`
+        : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
   const typeTag = (k.type === 'closed') ? '暗' : '明';
   const tagColor = (k.type === 'closed') ? '#ffd200' : '#ff6b6b';
   return `<div class="hand-tile" onclick="removeFromSection('kong', ${index})" title="點擊刪除">${inner}<span style="position:absolute;bottom:0;right:2px;font-size:8px;font-weight:800;color:${tagColor};z-index:2;">${typeTag}</span></div>`;
@@ -706,25 +1063,47 @@ function switchTab(tab, el) {
 
 function openCalcConfirm() {
   const totalTilesCount = openSection.length + closedSection.length + (kongSection.length * 3);
-  if (totalTilesCount !== 17) { showToast(`牌數不符（目前計算張數 ${totalTilesCount} 張，總計須為 17 張）`); return; }
-  cfRed = redFlowerCount; cfBlue = blueFlowerCount; cfSelectedTile = null; cfBonusState = {};
-  renderCfFlowerBtns(); renderCfTiles(); updateCfBonusButtons();
+  if (totalTilesCount !== 17) {
+    showToast(`牌數不符（目前計算張數 ${totalTilesCount} 張，總計須為 17 張）`);
+    return;
+  }
+
+  cfRed = redFlowerCount;
+  cfBlue = blueFlowerCount;
+  cfSelectedTile = null;
+  cfBonusState = {};
+
+  renderCfFlowerBtns();
+  renderCfTiles();
+  updateCfBonusButtons();
+
   document.getElementById('calcConfirmOverlay').classList.add('show');
 }
 
-function closeCalcConfirm() { document.getElementById('calcConfirmOverlay').classList.remove('show'); }
+function closeCalcConfirm() {
+  document.getElementById('calcConfirmOverlay').classList.remove('show');
+}
 
 function setConfirmFlower(type, count) {
   if (type === 'red') cfRed = count;
   if (type === 'blue') cfBlue = count;
-  if (cfRed + cfBlue > 8) { if (type === 'red') cfBlue = 8 - cfRed; else cfRed = 8 - cfBlue; showToast('花牌總數最多 8 張'); }
+
+  if (cfRed + cfBlue > 8) {
+    if (type === 'red') cfBlue = 8 - cfRed;
+    else cfRed = 8 - cfBlue;
+    showToast('花牌總數最多 8 張');
+  }
   renderCfFlowerBtns();
 }
 
 function renderCfFlowerBtns() {
   document.getElementById('cfFlowerTotal').textContent = cfRed + cfBlue;
-  document.getElementById('cfRedBtns').querySelectorAll('.cf-btn').forEach((b, i) => { b.classList.toggle('active', i === cfRed); });
-  document.getElementById('cfBlueBtns').querySelectorAll('.cf-btn').forEach((b, i) => { b.classList.toggle('active', i === cfBlue); });
+  document.getElementById('cfRedBtns').querySelectorAll('.cf-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === cfRed);
+  });
+  document.getElementById('cfBlueBtns').querySelectorAll('.cf-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === cfBlue);
+  });
 }
 
 function renderCfTiles() {
@@ -732,25 +1111,38 @@ function renderCfTiles() {
   const items = [];
   closedSection.forEach((id, i) => items.push({ sec:'closed', index:i, id, tag:'暗' }));
   openSection.forEach((id, i) => items.push({ sec:'open', index:i, id, tag:'明' }));
+
   grid.innerHTML = items.map(it => {
     const t = TILE_MAP[it.id];
     if (!t) return '';
-    const inner = t.img ? `<img src="${t.img}" alt="${t.label}">` : (t.type === 'num' ? `<span class="num ${t.color || 'black'}">${t.label}</span>` : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
+    const inner = t.img
+      ? `<img src="${t.img}" alt="${t.label}">`
+      : (t.type === 'num'
+          ? `<span class="num ${t.color || 'black'}">${t.label}</span>`
+          : `<span class="honor ${t.color || 'black'}">${t.label}</span>`);
     const selected = cfSelectedTile && cfSelectedTile.sec === it.sec && cfSelectedTile.index === it.index ? 'selected' : '';
     return `<div class="confirm-tile ${selected}" onclick="selectCfTile('${it.sec}', ${it.index}, '${it.id}')">${inner}<span class="ct-tag">${it.tag}</span></div>`;
   }).join('');
 }
 
 function selectCfTile(sec, index, id) {
-  if (cfSelectedTile && cfSelectedTile.sec === sec && cfSelectedTile.index === index) cfSelectedTile = null;
-  else cfSelectedTile = { sec, index, id };
+  if (cfSelectedTile && cfSelectedTile.sec === sec && cfSelectedTile.index === index) {
+    cfSelectedTile = null;
+  } else {
+    cfSelectedTile = { sec, index, id };
+  }
   renderCfTiles();
 }
 
 function cfToggleBonus(key, fan) {
-  if (cfBonusState[key] !== undefined) delete cfBonusState[key];
-  else cfBonusState[key] = fan;
-  if (key === 'selfDraw') window.isSelfDraw = cfBonusState.selfDraw !== undefined;
+  if (cfBonusState[key] !== undefined) {
+    delete cfBonusState[key];
+  } else {
+    cfBonusState[key] = fan;
+  }
+  if (key === 'selfDraw') {
+    window.isSelfDraw = cfBonusState.selfDraw !== undefined;
+  }
   updateCfBonusButtons();
 }
 
@@ -763,18 +1155,24 @@ function updateCfBonusButtons() {
 }
 
 function confirmCalc() {
-  if (!cfSelectedTile) { showToast('請先點選食胡嗰張牌'); return; }
-  redFlowerCount = cfRed; blueFlowerCount = cfBlue;
+  if (!cfSelectedTile) {
+    showToast('請先點選食胡嗰張牌');
+    return;
+  }
+  redFlowerCount = cfRed;
+  blueFlowerCount = cfBlue;
   window.selectedWinTile = { ...cfSelectedTile };
   window.isSelfDraw = cfBonusState.selfDraw !== undefined;
   window.pendingCfBonus = { ...cfBonusState };
+
   closeCalcConfirm();
   calculateSafe();
 }
 
-// ==================== 牌型分析核心（完整保留）====================
 function isValidWinningHand(counts) {
-  for (const id in counts) { if (counts[id] > 4) return false; }
+  for (const id in counts) {
+    if (counts[id] > 4) return false;
+  }
   const decomps = getAllDecompositions(counts);
   if (decomps.length > 0) return true;
   if (checkLuckyGulu(counts)) return true;
@@ -786,88 +1184,151 @@ function isValidWinningHand(counts) {
 function detectWinPatterns(hand, winTile, bestDecomp) {
   if (!winTile) return { items: [], total: 0 };
   const counts = { ...hand.counts };
-  if (checkSixteenNoMatch(counts) || checkThirteenOrphan(counts) || checkLuckyGulu(counts)) return { items: [], total: 0 };
+
+  if (checkSixteenNoMatch(counts) || checkThirteenOrphan(counts) || checkLuckyGulu(counts)) {
+    return { items: [], total: 0 };
+  }
+
   const winId = winTile.id;
+  
   const closedCounts = {};
   closedSection.forEach(id => closedCounts[id] = (closedCounts[id] || 0) + 1);
+
   if ((closedCounts[winId] || 0) <= 0) return { items: [], total: 0 };
+
   const beforeCounts = { ...closedCounts };
   beforeCounts[winId] -= 1;
   if (beforeCounts[winId] <= 0) delete beforeCounts[winId];
+
   let remainingClosedCount = 0;
   for (const k in beforeCounts) remainingClosedCount += beforeCounts[k];
+  
   const targetClosedMeldsCount = Math.floor((remainingClosedCount - 1) / 3);
-  let canSingleEye = false, canMiddleHole = false, canEdgeTile = false, canTwoSided = false;
+
+  let canSingleEye = false;
+  let canMiddleHole = false;
+  let canEdgeTile = false;
+  let canTwoSided = false;
+
   if ((beforeCounts[winId] || 0) >= 1) {
-    const testRem = { ...beforeCounts }; testRem[winId] -= 1;
+    const testRem = { ...beforeCounts };
+    testRem[winId] -= 1;
     if (testRem[winId] <= 0) delete testRem[winId];
-    const testMelds = []; searchMeldsStrict(testRem, targetClosedMeldsCount, [], testMelds);
+    const testMelds = [];
+    searchMeldsStrict(testRem, targetClosedMeldsCount, [], testMelds);
     if (testMelds.length > 0) canSingleEye = true;
   }
+
   const tWin = TILE_MAP[winId];
   if (tWin && tWin.type === 'num') {
-    const s = tWin.suit, n = tWin.num;
+    const s = tWin.suit;
+    const n = tWin.num;
+
     if (n >= 2 && n <= 8) {
-      const prevId = `${s}${n - 1}`, nextId = `${s}${n + 1}`;
+      const prevId = `${s}${n - 1}`;
+      const nextId = `${s}${n + 1}`;
       if ((beforeCounts[prevId] || 0) >= 1 && (beforeCounts[nextId] || 0) >= 1) {
-        const testRem = { ...beforeCounts }; testRem[prevId] -= 1; testRem[nextId] -= 1;
-        if (getAllDecompositions(testRem).length > 0) canMiddleHole = true;
+        const testRem = { ...beforeCounts };
+        testRem[prevId] -= 1;
+        testRem[nextId] -= 1;
+        const testDecomps = getAllDecompositions(testRem);
+        if (testDecomps.length > 0) canMiddleHole = true;
       }
     }
+
     if (n === 3) {
-      const id1 = `${s}1`, id2 = `${s}2`;
+      const id1 = `${s}1`;
+      const id2 = `${s}2`;
       if ((beforeCounts[id1] || 0) >= 1 && (beforeCounts[id2] || 0) >= 1) {
-        const testRem = { ...beforeCounts }; testRem[id1] -= 1; testRem[id2] -= 1;
-        if (getAllDecompositions(testRem).length > 0) canEdgeTile = true;
+        const testRem = { ...beforeCounts };
+        testRem[id1] -= 1;
+        testRem[id2] -= 1;
+        const testDecomps = getAllDecompositions(testRem);
+        if (testDecomps.length > 0) canEdgeTile = true;
       }
     }
     if (n === 7) {
-      const id8 = `${s}8`, id9 = `${s}9`;
+      const id8 = `${s}8`;
+      const id9 = `${s}9`;
       if ((beforeCounts[id8] || 0) >= 1 && (beforeCounts[id9] || 0) >= 1) {
-        const testRem = { ...beforeCounts }; testRem[id8] -= 1; testRem[id9] -= 1;
-        if (getAllDecompositions(testRem).length > 0) canEdgeTile = true;
+        const testRem = { ...beforeCounts };
+        testRem[id8] -= 1;
+        testRem[id9] -= 1;
+        const testDecomps = getAllDecompositions(testRem);
+        if (testDecomps.length > 0) canEdgeTile = true;
       }
     }
+
     if (n >= 4) {
-      const idPrev1 = `${s}${n - 1}`, idPrev2 = `${s}${n - 2}`;
+      const idPrev1 = `${s}${n - 1}`;
+      const idPrev2 = `${s}${n - 2}`;
       if ((beforeCounts[idPrev1] || 0) >= 1 && (beforeCounts[idPrev2] || 0) >= 1) {
-        const testRem = { ...beforeCounts }; testRem[idPrev1] -= 1; testRem[idPrev2] -= 1;
-        if (getAllDecompositions(testRem).length > 0) canTwoSided = true;
+        const testRem = { ...beforeCounts };
+        testRem[idPrev1] -= 1;
+        testRem[idPrev2] -= 1;
+        const testDecomps = getAllDecompositions(testRem);
+        if (testDecomps.length > 0) canTwoSided = true;
       }
     }
     if (n <= 6) {
-      const idNext1 = `${s}${n + 1}`, idNext2 = `${s}${n + 2}`;
+      const idNext1 = `${s}${n + 1}`;
+      const idNext2 = `${s}${n + 2}`;
       if ((beforeCounts[idNext1] || 0) >= 1 && (beforeCounts[idNext2] || 0) >= 1) {
-        const testRem = { ...beforeCounts }; testRem[idNext1] -= 1; testRem[idNext2] -= 1;
-        if (getAllDecompositions(testRem).length > 0) canTwoSided = true;
+        const testRem = { ...beforeCounts };
+        testRem[idNext1] -= 1;
+        testRem[idNext2] -= 1;
+        const testDecomps = getAllDecompositions(testRem);
+        if (testDecomps.length > 0) canTwoSided = true;
       }
     }
   }
-  if (canTwoSided) return { items: [], total: 0 };
+
+  if (canTwoSided) {
+    return { items: [], total: 0 };
+  }
+
   const isStrictSinglePattern = canSingleEye || canMiddleHole || canEdgeTile;
-  if (!isStrictSinglePattern) return { items: [], total: 0 };
+  if (!isStrictSinglePattern) {
+    return { items: [], total: 0 };
+  }
+
   const possibleWins = [winId];
   for (const t of TILE_DEFS) {
     if (t.id === winId) continue;
-    const testCounts = { ...beforeCounts }; testCounts[t.id] = (testCounts[t.id] || 0) + 1;
-    if (getAllDecompositions(testCounts).length > 0) possibleWins.push(t.id);
+    const testCounts = { ...beforeCounts };
+    testCounts[t.id] = (testCounts[t.id] || 0) + 1;
+    const testDecomps = getAllDecompositions(testCounts);
+    if (testDecomps.length > 0) {
+      possibleWins.push(t.id);
+    }
   }
+
   const uniqueWins = [...new Set(possibleWins)];
-  const items = []; let total = 0;
+  const items = [];
+  let total = 0;
+
   if (uniqueWins.length === 1 && uniqueWins[0] === winId) {
-    items.push({ id: 'realSingle', name: '獨獨', fan: 2, cat: '基本', detail: '全場只聽食胡呢一張牌（單吊/卡窿/邊張獨聽）' }); total += 2;
+    items.push({ id: 'realSingle', name: '獨獨', fan: 2, cat: '基本', detail: '全場只聽食胡呢一張牌（單吊/卡窿/邊張獨聽）' });
+    total += 2;
   } else if (uniqueWins.length > 1) {
-    items.push({ id: 'fakeSingle', name: '假獨', fan: 1, cat: '基本', detail: '牌型原為單吊/卡窿/邊張，但因牌組產生多面聽' }); total += 1;
+    items.push({ id: 'fakeSingle', name: '假獨', fan: 1, cat: '基本', detail: '牌型原為單吊/卡窿/邊張，但因牌組產生多面聽' });
+    total += 1;
   }
+
   return { items, total };
 }
 
 function analyzeHand() {
-  const counts = {}; const calcTiles = getTilesForCalculation();
+  const counts = {};
+  const calcTiles = getTilesForCalculation();
   calcTiles.forEach(id => counts[id] = (counts[id]||0)+1);
-  const suits = { wan:[], tong:[], so:[] }; const winds = [], dragons = [];
+
+  const suits = { wan:[], tong:[], so:[] };
+  const winds = [], dragons = [];
+  
   for (const id in counts) {
-    const t = TILE_MAP[id]; if (!t) continue;
+    const t = TILE_MAP[id];
+    if (!t) continue;
     if (t.suit === 'wan') suits.wan.push({ num:t.num, count:counts[id] });
     else if (t.suit === 'tong') suits.tong.push({ num:t.num, count:counts[id] });
     else if (t.suit === 'so') suits.so.push({ num:t.num, count:counts[id] });
@@ -877,31 +1338,45 @@ function analyzeHand() {
   return { counts, suits, winds, dragons, redFlowers: redFlowerCount, blueFlowers: blueFlowerCount };
 }
 
+// 修正 #4-C：深拷貝每個面子物件，避免不同拆牌組合共用記憶體參考導致 isWinMeld 殘留污染
 function searchMeldsStrict(remCounts, targetNeed, currentMelds, allMelds) {
   if (currentMelds.length === targetNeed) {
-    if (!Object.values(remCounts).some(c => c > 0)) {
-      allMelds.push(currentMelds.map(m => ({ ...m, nums: [...m.nums], ids: m.ids ? [...m.ids] : undefined })));
+    const hasRemaining = Object.values(remCounts).some(c => c > 0);
+    if (!hasRemaining) {
+      allMelds.push(currentMelds.map(m => ({
+        ...m,
+        nums: [...m.nums],
+        ids: m.ids ? [...m.ids] : undefined
+      })));
     }
     return;
   }
+
   let firstId = null;
-  for (const t of TILE_DEFS) { if ((remCounts[t.id] || 0) > 0) { firstId = t.id; break; } }
+  for (const t of TILE_DEFS) {
+    if ((remCounts[t.id] || 0) > 0) { firstId = t.id; break; }
+  }
   if (!firstId) return;
   const t = TILE_MAP[firstId];
+
   if ((remCounts[firstId] || 0) >= 3) {
     remCounts[firstId] -= 3;
     const mSuit = (t.type === 'honor') ? 'honor' : t.suit;
     currentMelds.push({ type: '刻子', nums: [t.num, t.num, t.num], suit: mSuit, id: t.id });
     searchMeldsStrict(remCounts, targetNeed, currentMelds, allMelds);
-    currentMelds.pop(); remCounts[firstId] += 3;
+    currentMelds.pop();
+    remCounts[firstId] += 3;
   }
+
   if (t.type === 'num' && t.num <= 7) {
-    const id2 = `${t.suit}${t.num + 1}`, id3 = `${t.suit}${t.num + 2}`;
+    const id2 = `${t.suit}${t.num + 1}`;
+    const id3 = `${t.suit}${t.num + 2}`;
     if ((remCounts[firstId] || 0) >= 1 && (remCounts[id2] || 0) >= 1 && (remCounts[id3] || 0) >= 1) {
       remCounts[firstId]--; remCounts[id2]--; remCounts[id3]--;
       currentMelds.push({ type: '順子', nums: [t.num, t.num + 1, t.num + 2], suit: t.suit, ids: [firstId, id2, id3] });
       searchMeldsStrict(remCounts, targetNeed, currentMelds, allMelds);
-      currentMelds.pop(); remCounts[firstId]++; remCounts[id2]++; remCounts[id3]++;
+      currentMelds.pop();
+      remCounts[firstId]++; remCounts[id2]++; remCounts[id3]++;
     }
   }
 }
@@ -911,15 +1386,21 @@ function getAllDecompositions(counts) {
   const tileIds = Object.keys(counts);
   let normalTileCount = 0;
   for (const id of tileIds) normalTileCount += counts[id];
+
   const targetMeldsCount = (normalTileCount - 2) / 3;
   if (targetMeldsCount < 0 || !Number.isInteger(targetMeldsCount)) return [];
+
   for (const pairId of tileIds) {
     if (counts[pairId] >= 2) {
       const t = TILE_MAP[pairId];
-      const rem = { ...counts }; rem[pairId] -= 2;
-      const meldResults = []; searchMeldsStrict(rem, targetMeldsCount, [], meldResults);
+      const rem = { ...counts };
+      rem[pairId] -= 2;
+      const meldResults = [];
+      searchMeldsStrict(rem, targetMeldsCount, [], meldResults);
       const pSuit = (t.type === 'honor') ? 'honor' : t.suit;
-      for (const melds of meldResults) decompositions.push({ pair: { suit: pSuit, num: t.num, id: pairId }, melds: melds });
+      for (const melds of meldResults) {
+        decompositions.push({ pair: { suit: pSuit, num: t.num, id: pairId }, melds: melds });
+      }
     }
   }
   return decompositions;
@@ -927,20 +1408,37 @@ function getAllDecompositions(counts) {
 
 function checkThirteenOrphan(counts) {
   if (openSection.length > 0 || kongSection.length > 0) return null;
-  const orphanIds = ['east','south','west','north','chung','fat','bak','wan1','wan9','tong1','tong9','so1','so9'];
-  for (const id of orphanIds) { if ((counts[id] || 0) < 1) return null; }
+
+  const orphanIds = [
+    'east', 'south', 'west', 'north', 'chung', 'fat', 'bak',
+    'wan1', 'wan9', 'tong1', 'tong9', 'so1', 'so9'
+  ];
+
+  for (const id of orphanIds) {
+    if ((counts[id] || 0) < 1) return null;
+  }
+
   for (const pairId of orphanIds) {
     if ((counts[pairId] || 0) >= 2) {
-      const rem = { ...counts }; orphanIds.forEach(id => rem[id] -= 1); rem[pairId] -= 1;
+      const rem = { ...counts };
+      orphanIds.forEach(id => rem[id] -= 1);
+      rem[pairId] -= 1;
+
       const remTileIds = [];
-      for (const id in rem) for (let i = 0; i < rem[id]; i++) remTileIds.push(id);
+      for (const id in rem) {
+        for (let i = 0; i < rem[id]; i++) remTileIds.push(id);
+      }
+
       if (remTileIds.length !== 3) continue;
+
       let extraMeld = null;
       if (remTileIds[0] === remTileIds[1] && remTileIds[1] === remTileIds[2]) {
         const t = TILE_MAP[remTileIds[0]];
         extraMeld = { type: '刻子', suit: (t.type === 'honor' ? 'honor' : t.suit), num: t.num, id: remTileIds[0] };
       } else {
-        const t1 = TILE_MAP[remTileIds[0]], t2 = TILE_MAP[remTileIds[1]], t3 = TILE_MAP[remTileIds[2]];
+        const t1 = TILE_MAP[remTileIds[0]];
+        const t2 = TILE_MAP[remTileIds[1]];
+        const t3 = TILE_MAP[remTileIds[2]];
         if (t1 && t2 && t3 && t1.suit === t2.suit && t2.suit === t3.suit && t1.type === 'num') {
           const sortedNums = [t1.num, t2.num, t3.num].sort((a,b)=>a-b);
           if (sortedNums[1] === sortedNums[0] + 1 && sortedNums[2] === sortedNums[0] + 2) {
@@ -948,34 +1446,62 @@ function checkThirteenOrphan(counts) {
           }
         }
       }
-      if (extraMeld) return { pairId, extraMeld };
+
+      if (extraMeld) {
+        return { pairId, extraMeld };
+      }
     }
   }
+
   return null;
 }
 
 function evaluateThirteenOrphan(counts, hand) {
   const result = checkThirteenOrphan(counts);
   if (!result) return null;
-  const detail = []; let totalFan = 100;
+
+  const detail = [];
+  let totalFan = 100;
+
   detail.push({ id: 'thirteenOrphan', name: '十三幺', fan: 100, cat: '大牌', detail: '齊集 13 種么九字牌 + 1 對眼 + 1 坎' });
+
   totalFan += 10;
   detail.push({ id: 'thirteenFly', name: '十三飛', fan: 10, cat: '大牌', detail: '十三幺 + 十三飛' });
+
   const { winds, dragons, redFlowers, blueFlowers } = hand;
-  if (isMissingFive(counts)) { totalFan += 5; detail.push({ id: 'missingFive', name: '缺五', fan: 5, cat: '組合', detail: '全副牌沒有 5' }); }
+  if (isMissingFive(counts)) {
+    totalFan += 5;
+    detail.push({ id: 'missingFive', name: '缺五', fan: 5, cat: '組合', detail: '全副牌沒有 5' });
+  }
+
   const extraMeld = result.extraMeld;
   let isMeldTerminal = false;
   if (extraMeld.type === '刻子') {
     const t = TILE_MAP[extraMeld.id];
     if (t && (t.num === 1 || t.num === 9 || t.type === 'honor')) isMeldTerminal = true;
-    if (t && t.type === 'honor') { totalFan += 2; detail.push({ id: 'wordTile', name: '字（每組字刻+2）', fan: 2, cat: '花摸', detail: '額外字牌刻子 +2 番' }); }
+    if (t && t.type === 'honor') {
+      totalFan += 2;
+      detail.push({ id: 'wordTile', name: '字（每組字刻+2）', fan: 2, cat: '花摸', detail: '額外字牌刻子 +2 番' });
+    }
   } else if (extraMeld.type === '順子') {
     if (extraMeld.nums.some(n => n === 1 || n === 9)) isMeldTerminal = true;
   }
-  if (isMeldTerminal && (winds.length > 0 || dragons.length > 0)) { totalFan += 30; detail.push({ id: 'mixedTerminal', name: '混帶幺', fan: 30, cat: '大牌', detail: '額外面子帶幺且有字牌' }); }
+
+  if (isMeldTerminal && (winds.length > 0 || dragons.length > 0)) {
+    totalFan += 30;
+    detail.push({ id: 'mixedTerminal', name: '混帶幺', fan: 30, cat: '大牌', detail: '額外面子帶幺且有字牌' });
+  }
+
   const totalFlowers = redFlowers + blueFlowers;
-  if (totalFlowers > 0) { const flowerFan = totalFlowers * 2; totalFan += flowerFan; detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' }); }
-  else { totalFan += 2; detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' }); }
+  if (totalFlowers > 0) {
+    const flowerFan = totalFlowers * 2;
+    totalFan += flowerFan;
+    detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' });
+  } else {
+    totalFan += 2;
+    detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' });
+  }
+
   const filtered = applyMaxOnlyRule(detail);
   const newTotal = filtered.reduce((s, d) => s + (d.fan || 0), 0);
   return { total: newTotal, detail: filtered };
@@ -983,35 +1509,74 @@ function evaluateThirteenOrphan(counts, hand) {
 
 function checkSixteenNoMatch(counts) {
   if (openSection.length > 0 || kongSection.length > 0) return false;
-  const honorIds = ['east','south','west','north','chung','fat','bak'];
-  for (const id of honorIds) { const c = counts[id] || 0; if (c < 1 || c > 2) return false; }
-  const suitIds = ['wan','tong','so']; const suitNums = { wan:[], tong:[], so:[] };
+
+  const honorIds = ['east', 'south', 'west', 'north', 'chung', 'fat', 'bak'];
+  for (const id of honorIds) {
+    const c = counts[id] || 0;
+    if (c < 1 || c > 2) return false;
+  }
+
+  const suitIds = ['wan', 'tong', 'so'];
+  const suitNums = { wan: [], tong: [], so: [] };
   for (const suit of suitIds) {
     for (let n = 1; n <= 9; n++) {
-      const id = `${suit}${n}`; const c = counts[id] || 0;
-      if (c > 0) { if (c > 2) return false; suitNums[suit].push({ num: n, count: c }); }
+      const id = `${suit}${n}`;
+      const c = counts[id] || 0;
+      if (c > 0) {
+        if (c > 2) return false;
+        suitNums[suit].push({ num: n, count: c });
+      }
     }
     if (suitNums[suit].length !== 3) return false;
+
     const nums = suitNums[suit].map(x => x.num).sort((a, b) => a - b);
-    for (let i = 1; i < nums.length; i++) if (nums[i] - nums[i - 1] < 3) return false;
+    for (let i = 1; i < nums.length; i++) {
+      if (nums[i] - nums[i - 1] < 3) return false;
+    }
   }
-  let totalTiles = 0, pairCount = 0;
-  for (const id in counts) { const c = counts[id]; totalTiles += c; if (c === 2) pairCount++; else if (c > 2) return false; }
+
+  let totalTiles = 0;
+  let pairCount = 0;
+
+  for (const id in counts) {
+    const c = counts[id];
+    totalTiles += c;
+    if (c === 2) pairCount++;
+    else if (c > 2) return false;
+  }
+
   if (totalTiles !== 17) return false;
   if (pairCount !== 1) return false;
+
   return true;
 }
 
 function evaluateSixteenNoMatch(counts, hand) {
   if (!checkSixteenNoMatch(counts)) return null;
-  const detail = []; let totalFan = 50;
+
+  const detail = [];
+  let totalFan = 50;
+
   detail.push({ id: 'sixteenNoMatch', name: '十六不搭', fan: 50, cat: '大牌', detail: '7 種字牌 + 三門各 3 張不搭數牌 + 1 對眼' });
+
   totalFan += 10;
   detail.push({ id: 'sixteenFly', name: '十六飛', fan: 10, cat: '大牌', detail: '十六不搭 + 十六飛' });
-  if (isMissingFive(counts)) { totalFan += 5; detail.push({ id: 'missingFive', name: '缺五', fan: 5, cat: '組合', detail: '全副牌沒有 5' }); }
+
+  if (isMissingFive(counts)) {
+    totalFan += 5;
+    detail.push({ id: 'missingFive', name: '缺五', fan: 5, cat: '組合', detail: '全副牌沒有 5' });
+  }
+
   const totalFlowers = hand.redFlowers + hand.blueFlowers;
-  if (totalFlowers > 0) { const flowerFan = totalFlowers * 2; totalFan += flowerFan; detail.push({ id: 'eachFlower', name: `花 (紅:${hand.redFlowers}, 藍:${hand.blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' }); }
-  else { totalFan += 2; detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' }); }
+  if (totalFlowers > 0) {
+    const flowerFan = totalFlowers * 2;
+    totalFan += flowerFan;
+    detail.push({ id: 'eachFlower', name: `花 (紅:${hand.redFlowers}, 藍:${hand.blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' });
+  } else {
+    totalFan += 2;
+    detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' });
+  }
+
   const filtered = applyMaxOnlyRule(detail);
   const newTotal = filtered.reduce((s, d) => s + (d.fan || 0), 0);
   return { total: newTotal, detail: filtered };
@@ -1019,37 +1584,66 @@ function evaluateSixteenNoMatch(counts, hand) {
 
 function checkLuckyGulu(counts) {
   if (openSection.length > 0 || kongSection.length > 0) return null;
+
   let totalTiles = 0;
   const tileIds = Object.keys(counts).filter(id => counts[id] > 0);
   for (const id of tileIds) totalTiles += counts[id];
   if (totalTiles !== 17) return null;
+
   const oddTiles = tileIds.filter(id => counts[id] % 2 !== 0);
   if (oddTiles.length !== 1) return null;
-  const oddId = oddTiles[0]; const oddCount = counts[oddId];
+
+  const oddId = oddTiles[0];
+  const oddCount = counts[oddId];
   if (oddCount !== 3) return null;
-  for (const id of tileIds) if (id !== oddId && counts[id] !== 2 && counts[id] !== 4) return null;
+
+  for (const id of tileIds) {
+    if (id !== oddId) {
+      if (counts[id] !== 2 && counts[id] !== 4) return null;
+    }
+  }
+
   return { oddId, oddCount };
 }
 
 function detectLuckyGuluPairChains(counts) {
-  const results = []; const suitNames = { wan: '萬', tong: '筒', so: '索' };
+  const results = [];
+  const suitNames = { wan: '萬', tong: '筒', so: '索' };
+
   for (const suit of ['wan', 'tong', 'so']) {
     const pairCounts = {};
     for (let n = 1; n <= 9; n++) {
-      const id = `${suit}${n}`; const c = counts[id] || 0;
-      if (c === 2) pairCounts[n] = 1; else if (c === 4) pairCounts[n] = 2; else pairCounts[n] = 0;
+      const id = `${suit}${n}`;
+      const c = counts[id] || 0;
+      if (c === 2) pairCounts[n] = 1;
+      else if (c === 4) pairCounts[n] = 2;
+      else pairCounts[n] = 0;
     }
+
     let start = null;
     for (let n = 1; n <= 10; n++) {
-      if (n <= 9 && pairCounts[n] > 0) { if (start === null) start = n; }
-      else {
+      if (n <= 9 && pairCounts[n] > 0) {
+        if (start === null) start = n;
+      } else {
         if (start !== null) {
-          const end = n - 1; const len = end - start + 1;
-          if (len >= 3 && len <= 7) {
-            let copies = 1; for (let k = start; k <= end; k++) copies *= pairCounts[k];
-            const chainInfo = getChainTierInfo(len);
-            if (chainInfo && copies > 0) {
-              results.push({ id: chainInfo.id, name: `${chainInfo.name}（${start}~${end}${suitNames[suit]}）×${copies}組`, fan: chainInfo.fan * copies, cat: '大牌', detail: `${copies}組 ${start}~${end}${suitNames[suit]} 連對，每組 +${chainInfo.fan} 番` });
+          const end = n - 1;
+          const len = end - start + 1;
+          if (len >= 3) {
+            if (len <= 7) {
+              let copies = 1;
+              for (let k = start; k <= end; k++) {
+                copies *= pairCounts[k];
+              }
+              const chainInfo = getChainTierInfo(len);
+              if (chainInfo && copies > 0) {
+                results.push({
+                  id: chainInfo.id,
+                  name: `${chainInfo.name}（${start}~${end}${suitNames[suit]}）×${copies}組`,
+                  fan: chainInfo.fan * copies,
+                  cat: '大牌',
+                  detail: `${copies}組 ${start}~${end}${suitNames[suit]} 連對，每組 +${chainInfo.fan} 番`
+                });
+              }
             }
           }
           start = null;
@@ -1072,125 +1666,294 @@ function getChainTierInfo(len) {
 function evaluateLuckyGulu(counts, hand) {
   const guluMatch = checkLuckyGulu(counts);
   if (!guluMatch) return null;
-  const detail = []; let totalFan = 50;
-  detail.push({ id: 'luckyGulu', name: '嚦咕嚦咕', fan: 50, cat: '大牌', detail: '七對一刻（不計門清）' });
+
+  const detail = [];
+  let totalFan = 50;
+
+  detail.push({
+    id: 'luckyGulu',
+    name: '嚦咕嚦咕',
+    fan: 50,
+    cat: '大牌',
+    detail: '七對一刻（不計門清）'
+  });
+
   totalFan += 10;
   detail.push({ id: 'eightFly', name: '八飛', fan: 10, cat: '大牌', detail: '嚦咕嚦咕 + 八飛' });
+
   const chainResults = detectLuckyGuluPairChains(counts);
-  chainResults.forEach(r => { totalFan += r.fan; detail.push(r); });
-  let eyeCount = 0; const eyeDetails = []; const suitNames = { wan: '萬', tong: '筒', so: '索' };
+  chainResults.forEach(r => {
+    totalFan += r.fan;
+    detail.push(r);
+  });
+
+  let eyeCount = 0;
+  const eyeDetails = [];
+  const suitNames = { wan: '萬', tong: '筒', so: '索' };
   for (const suit of ['wan', 'tong', 'so']) {
     for (const num of [2, 5, 8]) {
-      const id = `${suit}${num}`; const c = counts[id] || 0;
+      const id = `${suit}${num}`;
+      const c = counts[id] || 0;
       const pCount = c === 2 ? 1 : c === 4 ? 2 : 0;
-      if (pCount > 0) { eyeCount += pCount; eyeDetails.push(`${num}${suitNames[suit]}眼 ×${pCount}`); }
+      if (pCount > 0) {
+        eyeCount += pCount;
+        eyeDetails.push(`${num}${suitNames[suit]}眼 ×${pCount}`);
+      }
     }
   }
-  if (eyeCount > 0) { const eyeFan = eyeCount * 2; totalFan += eyeFan; detail.push({ id: 'eyeTile', name: `將眼（2/5/8）×${eyeCount}個`, fan: eyeFan, cat: '基本', detail: eyeDetails.join('、') + `，每個 +2 番` }); }
+  if (eyeCount > 0) {
+    const eyeFan = eyeCount * 2;
+    totalFan += eyeFan;
+    detail.push({
+      id: 'eyeTile',
+      name: `將眼（2/5/8）×${eyeCount}個`,
+      fan: eyeFan,
+      cat: '基本',
+      detail: eyeDetails.join('、') + `，每個 +2 番`
+    });
+  }
+
   const { suits, winds, dragons, redFlowers, blueFlowers } = hand;
   const totalFlowers = redFlowers + blueFlowers;
   const isWord = isWordOneColor(suits);
+
   const guluDoors = new Set();
-  for (const suit of ['wan', 'tong', 'so']) if (suits[suit].length > 0) guluDoors.add(suit);
+  for (const suit of ['wan', 'tong', 'so']) {
+    if (suits[suit].length > 0) guluDoors.add(suit);
+  }
   if (winds.length > 0) guluDoors.add('wind');
   if (dragons.length > 0) guluDoors.add('dragon');
   const hasFiveDoors = ['wan', 'tong', 'so', 'wind', 'dragon'].every(d => guluDoors.has(d));
   if (hasFiveDoors) {
     const hasBothFlowers = redFlowers > 0 && blueFlowers > 0;
-    if (hasBothFlowers) { totalFan += 15; detail.push({ id: 'bigSevenDoor', name: '七門齊', fan: 15, cat: '組合', detail: '萬筒索風三元五門齊 + 紅藍花齊，計 15 番' }); }
-    else { totalFan += 10; detail.push({ id: 'bigFiveDoor', name: '五門齊', fan: 10, cat: '組合', detail: '萬筒索風三元五門齊，計 10 番' }); }
+    if (hasBothFlowers) {
+      totalFan += 15;
+      detail.push({ id: 'bigSevenDoor', name: '七門齊', fan: 15, cat: '組合', detail: '萬筒索風三元五門齊 + 紅藍花齊，計 15 番' });
+    } else {
+      totalFan += 10;
+      detail.push({ id: 'bigFiveDoor', name: '五門齊', fan: 10, cat: '組合', detail: '萬筒索風三元五門齊，計 10 番' });
+    }
   }
+
   const dragonPairCount = ['chung', 'fat', 'bak'].filter(id => (counts[id] || 0) >= 2).length;
-  if (dragonPairCount === 3) { totalFan += 15; detail.push({ id: 'smallThreeDragon', name: '小三元（嚦咕）', fan: 15, cat: '大牌', detail: '中發白各齊一對，番數對半 15 番' }); }
+  if (dragonPairCount === 3) {
+    totalFan += 15;
+    detail.push({ id: 'smallThreeDragon', name: '小三元（嚦咕）', fan: 15, cat: '大牌', detail: '中發白各齊一對，番數對半 15 番' });
+  }
+
   const windPairIds = ['east', 'south', 'west', 'north'].filter(id => (counts[id] || 0) >= 2);
   const windPairCount = windPairIds.length;
-  if (windPairCount === 4) { totalFan += 30; detail.push({ id: 'smallFourJoy', name: '小四喜（嚦咕）', fan: 30, cat: '大牌', detail: '東南西北各齊一對，番數對半 30 番' }); }
-  else if (windPairCount === 3) { totalFan += 10; detail.push({ id: 'smallThreeWind', name: '小三風（嚦咕）', fan: 10, cat: '組合', detail: '東南西北任三款各齊一對，番數對半 10 番' }); }
-  if (isWord) { totalFan += 100; detail.push({ id: 'wordOneColor', name: '字一色', fan: 100, cat: '大牌' }); }
-  else {
+  if (windPairCount === 4) {
+    totalFan += 30;
+    detail.push({ id: 'smallFourJoy', name: '小四喜（嚦咕）', fan: 30, cat: '大牌', detail: '東南西北各齊一對，番數對半 30 番' });
+  } else if (windPairCount === 3) {
+    totalFan += 10;
+    detail.push({ id: 'smallThreeWind', name: '小三風（嚦咕）', fan: 10, cat: '組合', detail: '東南西北任三款各齊一對，番數對半 10 番' });
+  }
+
+  if (isWord) {
+    totalFan += 100;
+    detail.push({ id: 'wordOneColor', name: '字一色', fan: 100, cat: '大牌' });
+  } else {
     if (isPureOneColor(suits, winds, dragons)) { totalFan += 100; detail.push({...FAN_MAP['pureOneColor']}); }
     else if (isMixedOneColor(suits, winds, dragons)) { totalFan += 40; detail.push({...FAN_MAP['mixedOneColor']}); }
     if (isPureOld(suits, winds, dragons)) { totalFan += 300; detail.push({...FAN_MAP['pureOld']}); }
     if (isNoTerminal(suits, winds, dragons)) { totalFan += 5; detail.push({...FAN_MAP['noTerminal']}); }
     if (isMissingOne(suits, winds, dragons)) { totalFan += 5; detail.push({...FAN_MAP['missingOne']}); }
   }
+
   const isBig = isAllBig(counts, winds, dragons);
   const isSmall = isAllSmall(counts, winds, dragons);
   if (isBig) { totalFan += 50; detail.push({...FAN_MAP['allBig']}); }
   else if (isSmall) { totalFan += 50; detail.push({...FAN_MAP['allSmall']}); }
   else if (!isWord && isMissingFive(counts)) { totalFan += 5; detail.push({...FAN_MAP['missingFive']}); }
-  if (guluMatch.oddCount === 3 && TILE_MAP[guluMatch.oddId]?.type === 'honor') { totalFan += 2; detail.push({ id: 'wordTile', name: '字（每組字刻+2）×1組', fan: 2, cat: '花摸', detail: '字牌刻子 +2 番' }); }
-  if (totalFlowers === 0 && winds.length === 0 && dragons.length === 0) { totalFan += 10; detail.push({ id: 'noWordFlower', name: '無字花', fan: 10, cat: '花摸' }); }
-  else {
-    if (totalFlowers > 0) { const flowerFan = totalFlowers * 2; totalFan += flowerFan; detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' }); }
-    else { totalFan += 2; detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' }); }
-    if (winds.length === 0 && dragons.length === 0) { totalFan += 2; detail.push({ id: 'noWord', name: '無字', fan: 2, cat: '花摸' }); }
+
+  if (guluMatch.oddCount === 3 && TILE_MAP[guluMatch.oddId]?.type === 'honor') {
+    totalFan += 2;
+    detail.push({ id: 'wordTile', name: '字（每組字刻+2）×1組', fan: 2, cat: '花摸', detail: '字牌刻子 +2 番' });
   }
+
+  if (totalFlowers === 0 && winds.length === 0 && dragons.length === 0) {
+    totalFan += 10;
+    detail.push({ id: 'noWordFlower', name: '無字花', fan: 10, cat: '花摸' });
+  } else {
+    if (totalFlowers > 0) {
+      const flowerFan = totalFlowers * 2;
+      totalFan += flowerFan;
+      detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' });
+    } else {
+      totalFan += 2;
+      detail.push({ id: 'noFlower', name: '無花', fan: 2, cat: '花摸' });
+    }
+
+    if (winds.length === 0 && dragons.length === 0) {
+      totalFan += 2;
+      detail.push({ id: 'noWord', name: '無字', fan: 2, cat: '花摸' });
+    }
+  }
+
   const filtered = applyMaxOnlyRule(detail);
   const newTotal = filtered.reduce((s, d) => s + (d.fan || 0), 0);
   return { total: newTotal, detail: filtered };
 }
 
-// ==================== 其餘輔助偵測函數（完整保留）====================
 function detectMixedChainPongFromMelds(melds) {
-  const triplets = melds.filter(m => m.type === '刻子' && m.suit !== 'honor').map(m => ({ suit: m.suit, num: m.nums[0], meld: m }));
+  const triplets = melds.filter(m => m.type === '刻子' && m.suit !== 'honor').map(m => ({
+    suit: m.suit,
+    num: m.nums[0],
+    meld: m
+  }));
+
   if (triplets.length < 3) return [];
+
   const validChains = [];
+
   function dfs(currentChain) {
     const last = currentChain[currentChain.length - 1];
     if (currentChain.length >= 3) {
       let hasThreeMixedSubchain = false;
       for (let i = 0; i <= currentChain.length - 3; i++) {
-        const sub = currentChain.slice(i, i + 3); const subSuits = new Set(sub.map(x => x.suit));
-        if (subSuits.size === 3 && subSuits.has('wan') && subSuits.has('tong') && subSuits.has('so')) { hasThreeMixedSubchain = true; break; }
+        const sub = currentChain.slice(i, i + 3);
+        const subSuits = new Set(sub.map(x => x.suit));
+        if (subSuits.size === 3 && subSuits.has('wan') && subSuits.has('tong') && subSuits.has('so')) {
+          hasThreeMixedSubchain = true;
+          break;
+        }
       }
-      if (hasThreeMixedSubchain) validChains.push([...currentChain]);
+      if (hasThreeMixedSubchain) {
+        validChains.push([...currentChain]);
+      }
     }
     if (currentChain.length === 5) return;
+
     for (const t of triplets) {
       if (currentChain.includes(t)) continue;
-      if (t.num === last.num + 1 && t.suit !== last.suit) { currentChain.push(t); dfs(currentChain); currentChain.pop(); }
+      if (t.num === last.num + 1 && t.suit !== last.suit) {
+        currentChain.push(t);
+        dfs(currentChain);
+        currentChain.pop();
+      }
     }
   }
-  for (const t of triplets) dfs([t]);
-  if (validChains.length === 0) return [];
-  validChains.sort((a, b) => b.length - a.length);
-  const maxLen = validChains[0].length;
-  const bestChains = validChains.filter(c => c.length === maxLen);
-  const seen = new Set(); const uniqueChains = [];
-  for (const c of bestChains) { const key = c.map(t => `${t.num}${t.suit}`).join('-'); if (!seen.has(key)) { seen.add(key); uniqueChains.push(c); } }
-  const suitNames = { wan: '萬', tong: '筒', so: '索' }; const results = [];
-  for (const chain of uniqueChains) {
-    const len = chain.length; const pathStr = chain.map(t => `${t.num}${suitNames[t.suit]}`).join('→');
-    if (len === 5) results.push({ id: 'mixedFiveChain', name: `五雜連刻（${pathStr}）`, fan: 100, cat: '大牌', detail: `五組相連數字刻子，相鄰不同門且包含三雜連刻` });
-    else if (len === 4) results.push({ id: 'mixedFourChain', name: `四雜連刻（${pathStr}）`, fan: 40, cat: '組合', detail: `四組相連數字刻子，相鄰不同門且包含三雜連刻` });
-    else if (len === 3) results.push({ id: 'mixedThreeChain', name: `三雜連刻（${pathStr}）`, fan: 20, cat: '組合', detail: `三組相連數字刻子（萬、筒、索各一）` });
+
+  for (const t of triplets) {
+    dfs([t]);
   }
+
+  if (validChains.length === 0) return [];
+
+  validChains.sort((a, b) => b.length - a.length);
+  const maxLen = validChains.length > 0 ? validChains[0].length : 0;
+  const bestChains = validChains.filter(c => c.length === maxLen);
+
+  const seen = new Set();
+  const uniqueChains = [];
+  for (const c of bestChains) {
+    const key = c.map(t => `${t.num}${t.suit}`).join('-');
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueChains.push(c);
+    }
+  }
+
+  const suitNames = { wan: '萬', tong: '筒', so: '索' };
+  const results = [];
+
+  for (const chain of uniqueChains) {
+    const len = chain.length;
+    const pathStr = chain.map(t => `${t.num}${suitNames[t.suit]}`).join('→');
+    if (len === 5) {
+      results.push({
+        id: 'mixedFiveChain',
+        name: `五雜連刻（${pathStr}）`,
+        fan: 100,
+        cat: '大牌',
+        detail: `五組相連數字刻子，相鄰不同門且包含三雜連刻`
+      });
+    } else if (len === 4) {
+      results.push({
+        id: 'mixedFourChain',
+        name: `四雜連刻（${pathStr}）`,
+        fan: 40,
+        cat: '組合',
+        detail: `四組相連數字刻子，相鄰不同門且包含三雜連刻`
+      });
+    } else if (len === 3) {
+      results.push({
+        id: 'mixedThreeChain',
+        name: `三雜連刻（${pathStr}）`,
+        fan: 20,
+        cat: '組合',
+        detail: `三組相連數字刻子（萬、筒、索各一）`
+      });
+    }
+  }
+
   return results;
 }
 
+// 修正 #4-A：修正暗手牌池扣除順序，避免單吊將眼或食胡順子時重複扣除 remClosed[winTileId]
 function getSequenceMeldCounts(melds, pair) {
   const remClosed = {};
   closedSection.forEach(id => remClosed[id] = (remClosed[id] || 0) + 1);
-  if (pair && remClosed[pair.id]) remClosed[pair.id] = Math.max(0, remClosed[pair.id] - 2);
-  melds.forEach(m => { if (m.type === '刻子' && m.id && !m.isKong) { if ((remClosed[m.id] || 0) >= 3) remClosed[m.id] -= 3; } });
+
+  if (pair && remClosed[pair.id]) {
+    remClosed[pair.id] = Math.max(0, remClosed[pair.id] - 2);
+  }
+
+  melds.forEach(m => {
+    if (m.type === '刻子' && m.id && !m.isKong) {
+      if ((remClosed[m.id] || 0) >= 3) {
+        remClosed[m.id] -= 3;
+      }
+    }
+  });
+
   const seqCopyCount = {};
   melds.forEach(m => {
     if (m.type !== '順子') return;
-    const suit = m.suit; const start = m.nums[0]; const key = `${suit}${start}`;
-    if (!seqCopyCount[key]) seqCopyCount[key] = { suit, start, totalCopies: 0, closedCopies: 0, openCopies: 0, key };
+    const suit = m.suit;
+    const start = m.nums[0];
+    const key = `${suit}${start}`;
+    if (!seqCopyCount[key]) {
+      seqCopyCount[key] = {
+        suit,
+        start,
+        totalCopies: 0,
+        closedCopies: 0,
+        openCopies: 0,
+        key
+      };
+    }
     seqCopyCount[key].totalCopies++;
-    const id1 = `${suit}${start}`, id2 = `${suit}${start + 1}`, id3 = `${suit}${start + 2}`;
+
+    const id1 = `${suit}${start}`;
+    const id2 = `${suit}${start + 1}`;
+    const id3 = `${suit}${start + 2}`;
+
     if (m.isWinMeld) {
       if ((remClosed[id1] || 0) > 0) remClosed[id1]--;
       if ((remClosed[id2] || 0) > 0) remClosed[id2]--;
       if ((remClosed[id3] || 0) > 0) remClosed[id3]--;
-      seqCopyCount[key].openCopies++; return;
+      seqCopyCount[key].openCopies++;
+      return;
     }
-    const canCloseAll = (remClosed[id1] || 0) > 0 && (remClosed[id2] || 0) > 0 && (remClosed[id3] || 0) > 0;
-    if (canCloseAll) { remClosed[id1]--; remClosed[id2]--; remClosed[id3]--; seqCopyCount[key].closedCopies++; }
-    else seqCopyCount[key].openCopies++;
+
+    const canCloseAll =
+      (remClosed[id1] || 0) > 0 &&
+      (remClosed[id2] || 0) > 0 &&
+      (remClosed[id3] || 0) > 0;
+
+    if (canCloseAll) {
+      remClosed[id1]--;
+      remClosed[id2]--;
+      remClosed[id3]--;
+      seqCopyCount[key].closedCopies++;
+    } else {
+      seqCopyCount[key].openCopies++;
+    }
   });
+
   return seqCopyCount;
 }
 
@@ -1199,143 +1962,460 @@ const SUIT_NAMES = { wan: '萬', tong: '筒', so: '索' };
 function detectThreeColorStep(melds, pair) {
   const sequences = melds.filter(m => m.type === '順子');
   if (sequences.length < 3) return [];
+
   const seqCopyCount = getSequenceMeldCounts(melds, pair);
   const seqList = Object.values(seqCopyCount);
-  const suitOrders = [['wan','so','tong'],['so','tong','wan'],['tong','wan','so'],['wan','tong','so'],['tong','so','wan'],['so','wan','tong']];
-  const calcMatchCopies = (infos) => { const allClosedCopies = infos.reduce((acc, x) => acc * x.closedCopies, 1); const totalCopies = infos.reduce((acc, x) => acc * (x.closedCopies + x.openCopies), 1); return { allClosedCopies, openCopies: totalCopies - allClosedCopies }; };
-  const skyMatches = [], step4Matches = [], stepMatches = [];
+
+  const suitOrders = [
+    ['wan', 'so', 'tong'],
+    ['so', 'tong', 'wan'],
+    ['tong', 'wan', 'so'],
+    ['wan', 'tong', 'so'],
+    ['tong', 'so', 'wan'],
+    ['so', 'wan', 'tong'],
+  ];
+
+  const calcMatchCopies = (infos) => {
+    const allClosedCopies = infos.reduce((acc, x) => acc * x.closedCopies, 1);
+    const totalCopies = infos.reduce((acc, x) => acc * (x.closedCopies + x.openCopies), 1);
+    const openCopies = totalCopies - allClosedCopies;
+    return { allClosedCopies, openCopies };
+  };
+
+  const skyMatches = [];
+  const step4Matches = [];
+  const stepMatches = [];
+
   for (const order of suitOrders) {
-    const s1 = seqList.filter(x => x.suit === order[0]), s2 = seqList.filter(x => x.suit === order[1]), s3 = seqList.filter(x => x.suit === order[2]), s4 = seqList.filter(x => x.suit === order[0]), s5 = seqList.filter(x => x.suit === order[1]);
-    for (const a of s1) for (const b of s2) for (const c of s3) for (const d of s4) for (const e of s5) {
-      if (b.start === a.start + 1 && c.start === a.start + 2 && d.start === a.start + 3 && e.start === a.start + 4) skyMatches.push({ infos: [a, b, c, d, e] });
+    const s1 = seqList.filter(x => x.suit === order[0]);
+    const s2 = seqList.filter(x => x.suit === order[1]);
+    const s3 = seqList.filter(x => x.suit === order[2]);
+    const s4 = seqList.filter(x => x.suit === order[0]);
+    const s5 = seqList.filter(x => x.suit === order[1]);
+
+    for (const a of s1) {
+      for (const b of s2) {
+        for (const c of s3) {
+          for (const d of s4) {
+            for (const e of s5) {
+              if (b.start === a.start + 1 && c.start === a.start + 2 && d.start === a.start + 3 && e.start === a.start + 4) {
+                skyMatches.push({ infos: [a, b, c, d, e] });
+              }
+            }
+          }
+        }
+      }
     }
   }
+
   for (const order of suitOrders) {
-    const s1 = seqList.filter(x => x.suit === order[0]), s2 = seqList.filter(x => x.suit === order[1]), s3 = seqList.filter(x => x.suit === order[2]), s4 = seqList.filter(x => x.suit === order[0]);
-    for (const a of s1) for (const b of s2) for (const c of s3) for (const d of s4) {
-      if (b.start === a.start + 1 && c.start === a.start + 2 && d.start === a.start + 3) step4Matches.push({ infos: [a, b, c, d] });
+    const s1 = seqList.filter(x => x.suit === order[0]);
+    const s2 = seqList.filter(x => x.suit === order[1]);
+    const s3 = seqList.filter(x => x.suit === order[2]);
+    const s4 = seqList.filter(x => x.suit === order[0]);
+
+    for (const a of s1) {
+      for (const b of s2) {
+        for (const c of s3) {
+          for (const d of s4) {
+            if (b.start === a.start + 1 && c.start === a.start + 2 && d.start === a.start + 3) {
+              step4Matches.push({ infos: [a, b, c, d] });
+            }
+          }
+        }
+      }
     }
   }
+
   for (const order of suitOrders) {
-    const s1 = seqList.filter(x => x.suit === order[0]), s2 = seqList.filter(x => x.suit === order[1]), s3 = seqList.filter(x => x.suit === order[2]);
-    for (const a of s1) for (const b of s2) for (const c of s3) { if (b.start === a.start + 1 && c.start === a.start + 2) stepMatches.push({ infos: [a, b, c] }); }
+    const s1 = seqList.filter(x => x.suit === order[0]);
+    const s2 = seqList.filter(x => x.suit === order[1]);
+    const s3 = seqList.filter(x => x.suit === order[2]);
+
+    for (const a of s1) {
+      for (const b of s2) {
+        for (const c of s3) {
+          if (b.start === a.start + 1 && c.start === a.start + 2) {
+            stepMatches.push({ infos: [a, b, c] });
+          }
+        }
+      }
+    }
   }
-  const dedup = (matches) => { const seen = new Set(); const unique = []; for (const m of matches) { const key = m.infos.map(x => x.key).sort().join('|'); if (!seen.has(key)) { seen.add(key); unique.push(m); } } return unique; };
-  const uniqueSky = dedup(skyMatches), uniqueStep4 = dedup(step4Matches), uniqueStep = dedup(stepMatches);
-  const usedMeldKeys = new Set(); const results = [];
+
+  const dedup = (matches) => {
+    const seen = new Set();
+    const unique = [];
+    for (const m of matches) {
+      const key = m.infos.map(x => x.key).sort().join('|');
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(m);
+      }
+    }
+    return unique;
+  };
+
+  const uniqueSky = dedup(skyMatches);
+  const uniqueStep4 = dedup(step4Matches);
+  const uniqueStep = dedup(stepMatches);
+
+  const usedMeldKeys = new Set();
+  const results = [];
+
   for (const m of uniqueSky) {
-    const infos = m.infos; const keys = infos.map(x => x.key);
+    const infos = m.infos;
+    const keys = infos.map(x => x.key);
     if (keys.some(k => usedMeldKeys.has(k))) continue;
+
     const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-    if (allClosedCopies > 0) results.push({ id: 'threeColorSky2', name: `三色登天(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 110 * allClosedCopies, cat: '組合', detail: `五順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'threeColorSky1', name: `三色登天(明) ×${openCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 100 * openCopies, cat: '組合', detail: `五順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'threeColorSky2',
+        name: `三色登天(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 110 * allClosedCopies,
+        cat: '組合',
+        detail: `五順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'threeColorSky1',
+        name: `三色登天(明) ×${openCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 100 * openCopies,
+        cat: '組合',
+        detail: `五順子數字依次遞增 1，非全暗 ${openCopies} 條`
+      });
+    }
     keys.forEach(k => usedMeldKeys.add(k));
   }
+
   for (const m of uniqueStep4) {
-    const infos = m.infos; const keys = infos.map(x => x.key);
+    const infos = m.infos;
+    const keys = infos.map(x => x.key);
     if (keys.some(k => usedMeldKeys.has(k))) continue;
+
     const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-    if (allClosedCopies > 0) results.push({ id: 'threeColorStep4b', name: `三色四步高(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 40 * allClosedCopies, cat: '組合', detail: `四順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'threeColorStep4a', name: `三色四步高(明) ×${openCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 20 * openCopies, cat: '組合', detail: `四順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'threeColorStep4b',
+        name: `三色四步高(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 40 * allClosedCopies,
+        cat: '組合',
+        detail: `四順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'threeColorStep4a',
+        name: `三色四步高(明) ×${openCopies}條（${infos.map(x => `${x.start}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 20 * openCopies,
+        cat: '組合',
+        detail: `四順子數字依次遞增 1，非全暗 ${openCopies} 條`
+      });
+    }
     keys.forEach(k => usedMeldKeys.add(k));
   }
+
   for (const m of uniqueStep) {
-    const infos = m.infos; const keys = infos.map(x => x.key);
+    const infos = m.infos;
+    const keys = infos.map(x => x.key);
     if (keys.some(k => usedMeldKeys.has(k))) continue;
+
     const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-    if (allClosedCopies > 0) results.push({ id: 'threeColorStep2', name: `三色步步高(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}-${x.start+2}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 10 * allClosedCopies, cat: '組合', detail: `三門花色順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'threeColorStep1', name: `三色步步高(明) ×${openCopies}條（${infos.map(x => `${x.start}-${x.start+2}${SUIT_NAMES[x.suit]}`).join('→')}）`, fan: 5 * openCopies, cat: '組合', detail: `三門花色順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'threeColorStep2',
+        name: `三色步步高(暗) ×${allClosedCopies}條（${infos.map(x => `${x.start}-${x.start+2}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 10 * allClosedCopies,
+        cat: '組合',
+        detail: `三門花色順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'threeColorStep1',
+        name: `三色步步高(明) ×${openCopies}條（${infos.map(x => `${x.start}-${x.start+2}${SUIT_NAMES[x.suit]}`).join('→')}）`,
+        fan: 5 * openCopies,
+        cat: '組合',
+        detail: `三門花色順子數字依次遞增 1，非全暗 ${openCopies} 條`
+      });
+    }
     keys.forEach(k => usedMeldKeys.add(k));
   }
+
   return results;
 }
 
 function detectSameColorStep(melds, pair) {
   const sequences = melds.filter(m => m.type === '順子');
   if (sequences.length < 3) return [];
+
   const seqCopyCount = getSequenceMeldCounts(melds, pair);
   const results = [];
+
   for (const suit of ['wan', 'tong', 'so']) {
-    const suitSeqs = Object.values(seqCopyCount).filter(x => x.suit === suit && x.totalCopies > 0).sort((a, b) => a.start - b.start);
-    const skyMatches = [], step4Matches = [], stepMatches = [];
-    for (const a of suitSeqs) { const b = suitSeqs.find(x => x.start === a.start + 1), c = suitSeqs.find(x => x.start === a.start + 2), d = suitSeqs.find(x => x.start === a.start + 3), e = suitSeqs.find(x => x.start === a.start + 4); if (b && c && d && e) skyMatches.push({ infos: [a, b, c, d, e] }); }
-    for (const a of suitSeqs) { const b = suitSeqs.find(x => x.start === a.start + 1), c = suitSeqs.find(x => x.start === a.start + 2), d = suitSeqs.find(x => x.start === a.start + 3); if (b && c && d) step4Matches.push({ infos: [a, b, c, d] }); }
-    for (const a of suitSeqs) { const b = suitSeqs.find(x => x.start === a.start + 1), c = suitSeqs.find(x => x.start === a.start + 2); if (b && c) stepMatches.push({ infos: [a, b, c] }); }
-    const calcMatchCopies = (infos) => { const minCopies = Math.min(...infos.map(x => x.totalCopies)); if (minCopies <= 0) return { allClosedCopies: 0, openCopies: 0 }; const allClosedCopies = Math.min(...infos.map(x => x.closedCopies)); return { allClosedCopies, openCopies: minCopies - allClosedCopies }; };
+    const suitSeqs = Object.values(seqCopyCount)
+      .filter(x => x.suit === suit && x.totalCopies > 0)
+      .sort((a, b) => a.start - b.start);
+
+    const skyMatches = [];
+    const step4Matches = [];
+    const stepMatches = [];
+
+    for (const a of suitSeqs) {
+      const b = suitSeqs.find(x => x.start === a.start + 1);
+      const c = suitSeqs.find(x => x.start === a.start + 2);
+      const d = suitSeqs.find(x => x.start === a.start + 3);
+      const e = suitSeqs.find(x => x.start === a.start + 4);
+      if (b && c && d && e) skyMatches.push({ infos: [a, b, c, d, e] });
+    }
+
+    for (const a of suitSeqs) {
+      const b = suitSeqs.find(x => x.start === a.start + 1);
+      const c = suitSeqs.find(x => x.start === a.start + 2);
+      const d = suitSeqs.find(x => x.start === a.start + 3);
+      if (b && c && d) step4Matches.push({ infos: [a, b, c, d] });
+    }
+
+    for (const a of suitSeqs) {
+      const b = suitSeqs.find(x => x.start === a.start + 1);
+      const c = suitSeqs.find(x => x.start === a.start + 2);
+      if (b && c) stepMatches.push({ infos: [a, b, c] });
+    }
+
+    const calcMatchCopies = (infos) => {
+      const minCopies = Math.min(...infos.map(x => x.totalCopies));
+      if (minCopies <= 0) return { allClosedCopies: 0, openCopies: 0 };
+      const allClosedCopies = Math.min(...infos.map(x => x.closedCopies));
+      const openCopies = minCopies - allClosedCopies;
+      return { allClosedCopies, openCopies };
+    };
+
     const usedKeys = new Set();
+
     for (const m of skyMatches) {
-      const infos = m.infos; const keys = infos.map(x => x.key);
+      const infos = m.infos;
+      const keys = infos.map(x => x.key);
       if (keys.some(k => usedKeys.has(k))) continue;
       const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-      if (allClosedCopies > 0) results.push({ id: 'sameColorSky2', name: `同色登天(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[4].start+2}）`, fan: 220 * allClosedCopies, cat: '組合', detail: `同色五順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-      if (openCopies > 0) results.push({ id: 'sameColorSky1', name: `同色登天(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[4].start+2}）`, fan: 200 * openCopies, cat: '組合', detail: `同色五順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+      if (allClosedCopies > 0) {
+        results.push({
+          id: 'sameColorSky2',
+          name: `同色登天(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[4].start+2}）`,
+          fan: 220 * allClosedCopies,
+          cat: '組合',
+          detail: `同色五順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+        });
+      }
+      if (openCopies > 0) {
+        results.push({
+          id: 'sameColorSky1',
+          name: `同色登天(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[4].start+2}）`,
+          fan: 200 * openCopies,
+          cat: '組合',
+          detail: `同色五順子數字依次遞增 1，非全暗 ${openCopies} 條`
+        });
+      }
       keys.forEach(k => usedKeys.add(k));
     }
+
     for (const m of step4Matches) {
-      const infos = m.infos; const keys = infos.map(x => x.key);
+      const infos = m.infos;
+      const keys = infos.map(x => x.key);
       if (keys.some(k => usedKeys.has(k))) continue;
       const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-      if (allClosedCopies > 0) results.push({ id: 'sameColorStep4b', name: `同色四步高(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[3].start+2}）`, fan: 100 * allClosedCopies, cat: '組合', detail: `同色四順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-      if (openCopies > 0) results.push({ id: 'sameColorStep4a', name: `同色四步高(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[3].start+2}）`, fan: 50 * openCopies, cat: '組合', detail: `同色四順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+      if (allClosedCopies > 0) {
+        results.push({
+          id: 'sameColorStep4b',
+          name: `同色四步高(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[3].start+2}）`,
+          fan: 100 * allClosedCopies,
+          cat: '組合',
+          detail: `同色四順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+        });
+      }
+      if (openCopies > 0) {
+        results.push({
+          id: 'sameColorStep4a',
+          name: `同色四步高(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[3].start+2}）`,
+          fan: 50 * openCopies,
+          cat: '組合',
+          detail: `同色四順子數字依次遞增 1，非全暗 ${openCopies} 條`
+        });
+      }
       keys.forEach(k => usedKeys.add(k));
     }
+
     for (const m of stepMatches) {
-      const infos = m.infos; const keys = infos.map(x => x.key);
+      const infos = m.infos;
+      const keys = infos.map(x => x.key);
       if (keys.some(k => usedKeys.has(k))) continue;
       const { allClosedCopies, openCopies } = calcMatchCopies(infos);
-      if (allClosedCopies > 0) results.push({ id: 'sameColorStep2', name: `同色步步高(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[2].start+2}）`, fan: 20 * allClosedCopies, cat: '組合', detail: `同色三順子數字依次遞增 1，全暗 ${allClosedCopies} 條` });
-      if (openCopies > 0) results.push({ id: 'sameColorStep1', name: `同色步步高(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[2].start+2}）`, fan: 15 * openCopies, cat: '組合', detail: `同色三順子數字依次遞增 1，非全暗 ${openCopies} 條` });
+      if (allClosedCopies > 0) {
+        results.push({
+          id: 'sameColorStep2',
+          name: `同色步步高(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[2].start+2}）`,
+          fan: 20 * allClosedCopies,
+          cat: '組合',
+          detail: `同色三順子數字依次遞增 1，全暗 ${allClosedCopies} 條`
+        });
+      }
+      if (openCopies > 0) {
+        results.push({
+          id: 'sameColorStep1',
+          name: `同色步步高(明) ×${openCopies}條（${SUIT_NAMES[suit]}${infos[0].start}→${infos[2].start+2}）`,
+          fan: 15 * openCopies,
+          cat: '組合',
+          detail: `同色三順子數字依次遞增 1，非全暗 ${openCopies} 條`
+        });
+      }
       keys.forEach(k => usedKeys.add(k));
     }
   }
+
   return results;
 }
 
 function detectDragonsFromMelds(melds, pair) {
   const sequences = melds.filter(m => m.type === '順子');
   if (sequences.length < 2) return [];
+
   const seqCopyCount = getSequenceMeldCounts(melds, pair);
   const suitSeqs = { wan: {}, tong: {}, so: {} };
-  for (const key in seqCopyCount) { const s = seqCopyCount[key]; suitSeqs[s.suit][s.start] = s; }
+  for (const key in seqCopyCount) {
+    const s = seqCopyCount[key];
+    suitSeqs[s.suit][s.start] = s;
+  }
+
   const results = [];
+  const suitNames = { wan: '萬', tong: '筒', so: '索' };
+
   for (const suit of ['wan', 'tong', 'so']) {
-    const s123 = suitSeqs[suit][1], s456 = suitSeqs[suit][4], s789 = suitSeqs[suit][7];
+    const s123 = suitSeqs[suit][1];
+    const s456 = suitSeqs[suit][4];
+    const s789 = suitSeqs[suit][7];
     if (!s123 || !s456 || !s789) continue;
-    const infos = [s123, s456, s789]; const totalCopies = Math.min(...infos.map(x => x.totalCopies));
+
+    const infos = [s123, s456, s789];
+    const totalCopies = Math.min(...infos.map(x => x.totalCopies));
     if (totalCopies <= 0) continue;
-    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies)); const openCopies = totalCopies - allClosedCopies;
-    if (allClosedCopies > 0) results.push({ id: 'clearDragon2', name: `清龍(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}123+456+789）`, fan: 20 * allClosedCopies, cat: '組合', detail: `同色 123 + 456 + 789，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'clearDragon1', name: `清龍(明) ×${openCopies}條（${SUIT_NAMES[suit]}123+456+789）`, fan: 10 * openCopies, cat: '組合', detail: `同色 123 + 456 + 789，非全暗 ${openCopies} 條` });
+    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies));
+    const openCopies = totalCopies - allClosedCopies;
+
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'clearDragon2',
+        name: `清龍(暗) ×${allClosedCopies}條（${suitNames[suit]}123+456+789）`,
+        fan: 20 * allClosedCopies,
+        cat: '組合',
+        detail: `同色 123 + 456 + 789，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'clearDragon1',
+        name: `清龍(明) ×${openCopies}條（${suitNames[suit]}123+456+789）`,
+        fan: 10 * openCopies,
+        cat: '組合',
+        detail: `同色 123 + 456 + 789，非全暗 ${openCopies} 條`
+      });
+    }
   }
-  const suits = ['wan', 'tong', 'so']; const perms = [];
-  for (const s1 of suits) for (const s2 of suits) for (const s3 of suits) if (s1 !== s2 && s2 !== s3 && s1 !== s3) perms.push([s1, s2, s3]);
+
+  const suits = ['wan', 'tong', 'so'];
+  const perms = [];
+  for (const s1 of suits) {
+    for (const s2 of suits) {
+      for (const s3 of suits) {
+        if (s1 !== s2 && s2 !== s3 && s1 !== s3) {
+          perms.push([s1, s2, s3]);
+        }
+      }
+    }
+  }
   for (const perm of perms) {
-    const sA = suitSeqs[perm[0]][1], sB = suitSeqs[perm[1]][4], sC = suitSeqs[perm[2]][7];
+    const sA = suitSeqs[perm[0]][1];
+    const sB = suitSeqs[perm[1]][4];
+    const sC = suitSeqs[perm[2]][7];
     if (!sA || !sB || !sC) continue;
-    const infos = [sA, sB, sC]; const totalCopies = Math.min(...infos.map(x => x.totalCopies));
+
+    const infos = [sA, sB, sC];
+    const totalCopies = Math.min(...infos.map(x => x.totalCopies));
     if (totalCopies <= 0) continue;
-    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies)); const openCopies = totalCopies - allClosedCopies;
-    if (allClosedCopies > 0) results.push({ id: 'mixedDragon2', name: `雜龍(暗) ×${allClosedCopies}條（${SUIT_NAMES[perm[0]]}123+${SUIT_NAMES[perm[1]]}456+${SUIT_NAMES[perm[2]]}789）`, fan: 15 * allClosedCopies, cat: '組合', detail: `三色 123 + 456 + 789，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'mixedDragon1', name: `雜龍(明) ×${openCopies}條（${SUIT_NAMES[perm[0]]}123+${SUIT_NAMES[perm[1]]}456+${SUIT_NAMES[perm[2]]}789）`, fan: 8 * openCopies, cat: '組合', detail: `三色 123 + 456 + 789，非全暗 ${openCopies} 條` });
+    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies));
+    const openCopies = totalCopies - allClosedCopies;
+
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'mixedDragon2',
+        name: `雜龍(暗) ×${allClosedCopies}條（${suitNames[perm[0]]}123+${suitNames[perm[1]]}456+${suitNames[perm[2]]}789）`,
+        fan: 15 * allClosedCopies,
+        cat: '組合',
+        detail: `三色 123 + 456 + 789，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'mixedDragon1',
+        name: `雜龍(明) ×${openCopies}條（${suitNames[perm[0]]}123+${suitNames[perm[1]]}456+${suitNames[perm[2]]}789）`,
+        fan: 8 * openCopies,
+        cat: '組合',
+        detail: `三色 123 + 456 + 789，非全暗 ${openCopies} 條`
+      });
+    }
   }
+
   for (const suit of ['wan', 'tong', 'so']) {
-    const s123 = suitSeqs[suit][1], s789 = suitSeqs[suit][7], s456 = suitSeqs[suit][4];
-    if (!s123 || !s789 || s456) continue;
-    const infos = [s123, s789]; const totalCopies = Math.min(...infos.map(x => x.totalCopies));
+    const s123 = suitSeqs[suit][1];
+    const s789 = suitSeqs[suit][7];
+    const s456 = suitSeqs[suit][4];
+    if (!s123 || !s789) continue;
+    if (s456) continue;
+
+    const infos = [s123, s789];
+    const totalCopies = Math.min(...infos.map(x => x.totalCopies));
     if (totalCopies <= 0) continue;
-    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies)); const openCopies = totalCopies - allClosedCopies;
-    if (allClosedCopies > 0) results.push({ id: 'oldYoungUp', name: `老少(暗) ×${allClosedCopies}條（${SUIT_NAMES[suit]}123+789）`, fan: 5 * allClosedCopies, cat: '組合', detail: `同色 123 + 789，全暗 ${allClosedCopies} 條` });
-    if (openCopies > 0) results.push({ id: 'oldYoungUp', name: `老少(明) ×${openCopies}條（${SUIT_NAMES[suit]}123+789）`, fan: 5 * openCopies, cat: '組合', detail: `同色 123 + 789，非全暗 ${openCopies} 條` });
+    const allClosedCopies = Math.min(...infos.map(x => x.closedCopies));
+    const openCopies = totalCopies - allClosedCopies;
+
+    if (allClosedCopies > 0) {
+      results.push({
+        id: 'oldYoungUp',
+        name: `老少(暗) ×${allClosedCopies}條（${suitNames[suit]}123+789）`,
+        fan: 5 * allClosedCopies,
+        cat: '組合',
+        detail: `同色 123 + 789，全暗 ${allClosedCopies} 條`
+      });
+    }
+    if (openCopies > 0) {
+      results.push({
+        id: 'oldYoungUp',
+        name: `老少(明) ×${openCopies}條（${suitNames[suit]}123+789）`,
+        fan: 5 * openCopies,
+        cat: '組合',
+        detail: `同色 123 + 789，非全暗 ${openCopies} 條`
+      });
+    }
   }
+
   return results;
 }
 
 function detectOldYoungPongFromMelds(melds) {
-  const results = []; const suitNames = { wan:'萬', tong:'筒', so:'索' };
+  const results = [];
+  const suitNames = { wan:'萬', tong:'筒', so:'索' };
   for (const suit of ['wan', 'tong', 'so']) {
     const has111 = melds.some(m => m.type === '刻子' && m.suit === suit && m.nums[0] === 1);
     const has999 = melds.some(m => m.type === '刻子' && m.suit === suit && m.nums[0] === 9);
-    if (has111 && has999) results.push({ id: 'oldYoungPong', name: `老少碰（${suitNames[suit]}111+999）`, fan: 5, cat: '組合', detail: `同色 111 及 999 刻子` });
+    if (has111 && has999) {
+      results.push({
+        id: 'oldYoungPong',
+        name: `老少碰（${suitNames[suit]}111+999）`,
+        fan: 5,
+        cat: '組合',
+        detail: `同色 111 及 999 刻子`
+      });
+    }
   }
   return results;
 }
@@ -1343,24 +2423,61 @@ function detectOldYoungPongFromMelds(melds) {
 function detectThreeMeetFromMelds(melds, pair) {
   const sequences = melds.filter(m => m.type === '順子');
   if (sequences.length < 3) return { results: [], threeMeetKeys: new Set() };
+
   const seqCopyCount = getSequenceMeldCounts(melds, pair);
-  let closedTotal = 0, openTotal = 0;
-  const closedDetails = [], openDetails = [], threeMeetKeys = new Set();
+
+  let closedTotal = 0;
+  let openTotal = 0;
+  const closedDetails = [];
+  const openDetails = [];
+  const threeMeetKeys = new Set();
+
   for (let start = 1; start <= 7; start++) {
-    const wanSeq = seqCopyCount[`wan${start}`], tongSeq = seqCopyCount[`tong${start}`], soSeq = seqCopyCount[`so${start}`];
+    const wanSeq = seqCopyCount[`wan${start}`];
+    const tongSeq = seqCopyCount[`tong${start}`];
+    const soSeq = seqCopyCount[`so${start}`];
+
     if (!wanSeq || !tongSeq || !soSeq) continue;
     if (wanSeq.totalCopies === 0 || tongSeq.totalCopies === 0 || soSeq.totalCopies === 0) continue;
-    const key = `${start},${start+1},${start+2}`; threeMeetKeys.add(key);
+
+    const key = `${start},${start+1},${start+2}`;
+    threeMeetKeys.add(key);
+
     const totalThreeMeet = wanSeq.totalCopies * tongSeq.totalCopies * soSeq.totalCopies;
     const closedThreeMeet = wanSeq.closedCopies * tongSeq.closedCopies * soSeq.closedCopies;
     const openThreeMeet = totalThreeMeet - closedThreeMeet;
+
     const displayNums = `${start}${start+1}${start+2}`;
-    if (closedThreeMeet > 0) { closedTotal += closedThreeMeet; closedDetails.push(`${displayNums}萬筒索(暗) ×${closedThreeMeet}`); }
-    if (openThreeMeet > 0) { openTotal += openThreeMeet; openDetails.push(`${displayNums}萬筒索(明) ×${openThreeMeet}`); }
+    if (closedThreeMeet > 0) {
+      closedTotal += closedThreeMeet;
+      closedDetails.push(`${displayNums}萬筒索(暗) ×${closedThreeMeet}`);
+    }
+    if (openThreeMeet > 0) {
+      openTotal += openThreeMeet;
+      openDetails.push(`${displayNums}萬筒索(明) ×${openThreeMeet}`);
+    }
   }
+
   const results = [];
-  if (closedTotal > 0) results.push({ id: 'threeMeet2', name: `暗三相逢 ×${closedTotal}組`, fan: 20 * closedTotal, cat: '組合', detail: closedDetails.join('、') });
-  if (openTotal > 0) results.push({ id: 'threeMeet1', name: `明三相逢 ×${openTotal}組`, fan: 10 * openTotal, cat: '組合', detail: openDetails.join('、') });
+  if (closedTotal > 0) {
+    results.push({
+      id: 'threeMeet2',
+      name: `暗三相逢 ×${closedTotal}組`,
+      fan: 20 * closedTotal,
+      cat: '組合',
+      detail: closedDetails.join('、')
+    });
+  }
+  if (openTotal > 0) {
+    results.push({
+      id: 'threeMeet1',
+      name: `明三相逢 ×${openTotal}組`,
+      fan: 10 * openTotal,
+      cat: '組合',
+      detail: openDetails.join('、')
+    });
+  }
+
   return { results, threeMeetKeys };
 }
 
@@ -1373,9 +2490,11 @@ function detectSistersFromMelds(melds, threeMeetKeys) {
     if (threeMeetKeys && threeMeetKeys.has(key)) continue;
     const suitCounts = seqMap[key]; const suitsArr = Object.keys(suitCounts);
     if (suitsArr.length >= 2) {
-      for (let i = 0; i < suitsArr.length; i++) for (let j = i + 1; j < suitsArr.length; j++) {
-        const pairs = Math.min(suitCounts[suitsArr[i]], suitCounts[suitsArr[j]]);
-        if (pairs > 0) { totalSisterPairs += pairs; details.push(`${key.replace(/,/g,'')}(${suitNames[suitsArr[i]]}&${suitNames[suitsArr[j]]}) ×${pairs}`); }
+      for (let i = 0; i < suitsArr.length; i++) {
+        for (let j = i + 1; j < suitsArr.length; j++) {
+          const pairs = Math.min(suitCounts[suitsArr[i]], suitCounts[suitsArr[j]]);
+          if (pairs > 0) { totalSisterPairs += pairs; details.push(`${key.replace(/,/g,'')}(${suitNames[suitsArr[i]]}&${suitNames[suitsArr[j]]}) ×${pairs}`); }
+        }
       }
     }
   }
@@ -1383,40 +2502,108 @@ function detectSistersFromMelds(melds, threeMeetKeys) {
   return { id: 'sisters', name: `姊妹 ×${totalSisterPairs}組`, fan: 3 * totalSisterPairs, cat: '組合', detail: details.join('、') };
 }
 
-function countHonorTriplets(melds) { return melds.filter(m => m.type === '刻子' && m.suit === 'honor').length; }
+function countHonorTriplets(melds) {
+  return melds.filter(m => m.type === '刻子' && m.suit === 'honor').length;
+}
 
 function detectChainPongFromMelds(melds, pair) {
   const triplets = melds.filter(m => m.type === '刻子' && m.suit !== 'honor');
   const suitMap = {};
   triplets.forEach(t => { if (!suitMap[t.suit]) suitMap[t.suit] = []; suitMap[t.suit].push(t.nums[0]); });
-  const results = []; const suitNames = { wan:'萬', tong:'筒', so:'索' };
+  const results = [];
+  const suitNames = { wan:'萬', tong:'筒', so:'索' };
+
   for (const suit in suitMap) {
     const nums = [...new Set(suitMap[suit])].sort((a, b) => a - b);
     const sName = suitNames[suit];
     const hasValidEye = Boolean(pair && pair.suit === suit && !nums.includes(pair.num));
+
     const combinedNums = hasValidEye ? [...nums, pair.num].sort((a, b) => a - b) : [...nums];
     if (combinedNums.length < 2) continue;
-    const consecutiveGroups = []; let currentGroup = [combinedNums[0]];
+
+    const consecutiveGroups = [];
+    let currentGroup = [combinedNums[0]];
     for (let i = 1; i < combinedNums.length; i++) {
-      if (combinedNums[i] === combinedNums[i - 1] + 1) currentGroup.push(combinedNums[i]);
-      else { if (currentGroup.length >= 2) consecutiveGroups.push([...currentGroup]); currentGroup = [combinedNums[i]]; }
+      if (combinedNums[i] === combinedNums[i - 1] + 1) {
+        currentGroup.push(combinedNums[i]);
+      } else {
+        if (currentGroup.length >= 2) consecutiveGroups.push([...currentGroup]);
+        currentGroup = [combinedNums[i]];
+      }
     }
     if (currentGroup.length >= 2) consecutiveGroups.push([...currentGroup]);
+
     for (const group of consecutiveGroups) {
-      const tripletNumsInGroup = group.filter(n => nums.includes(n)); const tLen = tripletNumsInGroup.length;
+      const tripletNumsInGroup = group.filter(n => nums.includes(n));
+      const tLen = tripletNumsInGroup.length;
       if (tLen < 2) continue;
+
       const hasEyeInGroup = hasValidEye && group.includes(pair.num);
-      const minT = tripletNumsInGroup[0], maxT = tripletNumsInGroup[tLen - 1];
-      if (tLen >= 5) results.push({ id: 'bigFiveChain', name: `大五連刻（${minT}~${maxT}${sName}）`, fan: 100, cat: '大牌', detail: `5組同色相連刻子` });
-      else if (tLen === 4) {
-        if (hasEyeInGroup) results.push({ id: 'fiveSmallChain', name: `五小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`, fan: 50, cat: '組合', detail: `4組相連刻子 + 相連將眼` });
-        else results.push({ id: 'bigFourChain', name: `大四連刻（${minT}~${maxT}${sName}）`, fan: 40, cat: '組合', detail: `4組同色相連刻子` });
+      const minT = tripletNumsInGroup[0];
+      const maxT = tripletNumsInGroup[tLen - 1];
+
+      if (tLen >= 5) {
+        results.push({
+          id: 'bigFiveChain',
+          name: `大五連刻（${minT}~${maxT}${sName}）`,
+          fan: 100,
+          cat: '大牌',
+          detail: `5組同色相連刻子`
+        });
+      } else if (tLen === 4) {
+        if (hasEyeInGroup) {
+          results.push({
+            id: 'fiveSmallChain',
+            name: `五小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`,
+            fan: 50,
+            cat: '組合',
+            detail: `4組相連刻子 + 相連將眼`
+          });
+        } else {
+          results.push({
+            id: 'bigFourChain',
+            name: `大四連刻（${minT}~${maxT}${sName}）`,
+            fan: 40,
+            cat: '組合',
+            detail: `4組同色相連刻子`
+          });
+        }
       } else if (tLen === 3) {
-        if (hasEyeInGroup) results.push({ id: 'fourSmallChain', name: `四小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`, fan: 30, cat: '組合', detail: `3組相連刻子 + 相連將眼` });
-        else results.push({ id: 'bigThreeChain', name: `大三連刻（${minT}~${maxT}${sName}）`, fan: 20, cat: '組合', detail: `3組同色相連刻子` });
+        if (hasEyeInGroup) {
+          results.push({
+            id: 'fourSmallChain',
+            name: `四小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`,
+            fan: 30,
+            cat: '組合',
+            detail: `3組相連刻子 + 相連將眼`
+          });
+        } else {
+          results.push({
+            id: 'bigThreeChain',
+            name: `大三連刻（${minT}~${maxT}${sName}）`,
+            fan: 20,
+            cat: '組合',
+            detail: `3組同色相連刻子`
+          });
+        }
       } else if (tLen === 2) {
-        if (hasEyeInGroup) results.push({ id: 'smallThreeChain', name: `三小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`, fan: 10, cat: '組合', detail: `2組相連刻子 + 相連將眼` });
-        else results.push({ id: 'chainPong', name: `連刻（${minT}~${maxT}${sName}）`, fan: 5, cat: '組合', detail: `2組同色相連刻子` });
+        if (hasEyeInGroup) {
+          results.push({
+            id: 'smallThreeChain',
+            name: `三小連刻（${tripletNumsInGroup.join(',')}刻 + ${pair.num}${sName}眼）`,
+            fan: 10,
+            cat: '組合',
+            detail: `2組相連刻子 + 相連將眼`
+          });
+        } else {
+          results.push({
+            id: 'chainPong',
+            name: `連刻（${minT}~${maxT}${sName}）`,
+            fan: 5,
+            cat: '組合',
+            detail: `2組同色相連刻子`
+          });
+        }
       }
     }
   }
@@ -1428,31 +2615,56 @@ function isMissingFive(counts) { return ['wan5', 'tong5', 'so5'].every(id => !co
 function isAllBig(counts, winds, dragons) {
   if (winds.length > 0 || dragons.length > 0) return false;
   let hasNum = false;
-  for (const id in counts) { const t = TILE_MAP[id]; if (!t) continue; if (t.type === 'honor') return false; hasNum = true; if (t.num < 6) return false; }
+  for (const id in counts) {
+    const t = TILE_MAP[id];
+    if (!t) continue;
+    if (t.type === 'honor') return false;
+    hasNum = true;
+    if (t.num < 6) return false;
+  }
   return hasNum;
 }
 
 function isAllSmall(counts, winds, dragons) {
   if (winds.length > 0 || dragons.length > 0) return false;
   let hasNum = false;
-  for (const id in counts) { const t = TILE_MAP[id]; if (!t) continue; if (t.type === 'honor') return false; hasNum = true; if (t.num > 4) return false; }
+  for (const id in counts) {
+    const t = TILE_MAP[id];
+    if (!t) continue;
+    if (t.type === 'honor') return false;
+    hasNum = true;
+    if (t.num > 4) return false;
+  }
   return hasNum;
 }
 
 function detectFourBackFromMelds(melds, pair, counts) {
-  const results = []; const suitNames = { wan:'萬', tong:'筒', so:'索' };
+  const results = [];
+  const suitNames = { wan:'萬', tong:'筒', so:'索' };
+
   for (const id in counts) {
     if (counts[id] === 4) {
-      const t = TILE_MAP[id]; if (!t) continue;
+      const t = TILE_MAP[id];
+      if (!t) continue;
       const isPair = (pair && pair.id === id);
       const seqMeldsCount = melds.filter(m => m.type === '順子' && m.suit === t.suit && m.nums.includes(t.num)).length;
       const tripletMeldsCount = melds.filter(m => m.type === '刻子' && m.id === id).length;
       const displayLabel = `${t.label}${suitNames[t.suit]||''}`;
-      const isOpen = openSection.includes(id) || kongSection.some(k => k.id === id && k.type === 'open') || (!window.isSelfDraw && window.selectedWinTile && window.selectedWinTile.id === id);
+      const isOpen = openSection.includes(id) 
+        || kongSection.some(k => k.id === id && k.type === 'open')
+        || (!window.isSelfDraw && window.selectedWinTile && window.selectedWinTile.id === id);
       const openTag = isOpen ? '明' : '暗';
-      if (seqMeldsCount === 4) { const fan = isOpen ? 15 : 20; results.push({ id: 'fourBack4', name: `四歸四(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}拆入4個順子之中` }); }
-      else if (isPair) { const fan = isOpen ? 10 : 15; results.push({ id: 'fourBack2', name: `四歸二(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}用盡，其中2張作為將眼` }); }
-      else if (seqMeldsCount >= 1 || tripletMeldsCount >= 1) { const fan = isOpen ? 5 : 10; results.push({ id: 'fourBack1', name: `四歸一(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}用盡於面子之中` }); }
+
+      if (seqMeldsCount === 4) {
+        const fan = isOpen ? 15 : 20;
+        results.push({ id: 'fourBack4', name: `四歸四(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}拆入4個順子之中` });
+      } else if (isPair) {
+        const fan = isOpen ? 10 : 15;
+        results.push({ id: 'fourBack2', name: `四歸二(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}用盡，其中2張作為將眼` });
+      } else if (seqMeldsCount >= 1 || tripletMeldsCount >= 1) {
+        const fan = isOpen ? 5 : 10;
+        results.push({ id: 'fourBack1', name: `四歸一(${openTag})（${displayLabel}）`, fan, cat: '組合', detail: `4張${displayLabel}用盡於面子之中` });
+      }
     }
   }
   return results;
@@ -1478,18 +2690,35 @@ function detectMixedWithXFromMelds(melds, tiles, hand, pair) {
   if (!hand || !pair) return [];
   const numMelds = melds.filter(m => m.suit !== 'honor');
   if (numMelds.length < 2) return [];
+
   const hasWord = hand.winds.length > 0 || hand.dragons.length > 0;
   const results = [];
+
   for (let x = 1; x <= 9; x++) {
     if (pair.suit !== 'honor' && pair.num !== x) continue;
+
     let allMatch = true;
-    for (const m of numMelds) if (!m.nums.includes(x)) { allMatch = false; break; }
+    for (const m of numMelds) {
+      if (!m.nums.includes(x)) { allMatch = false; break; }
+    }
+
     if (!allMatch) continue;
+
     const fan = hasWord ? 30 : 80;
     const name = hasWord ? `混帶X（混${x}）` : `全帶X（全${x}）`;
-    const detail = hasWord ? `每組數字面子及將眼都含 ${x}，且有字牌` : `每組數字面子及將眼都含 ${x}（無字牌）`;
-    results.push({ id: hasWord ? 'mixedWithX' : 'allWithX', name, fan, cat: '大牌', detail });
+    const detail = hasWord
+      ? `每組數字面子及將眼都含 ${x}，且有字牌`
+      : `每組數字面子及將眼都含 ${x}（無字牌）`;
+
+    results.push({
+      id: hasWord ? 'mixedWithX' : 'allWithX',
+      name,
+      fan,
+      cat: '大牌',
+      detail
+    });
   }
+
   return results;
 }
 
@@ -1497,10 +2726,13 @@ function detectMixedTerminalFromMelds(melds, hand, pair) {
   const { winds, dragons } = hand;
   if (winds.length === 0 && dragons.length === 0) return null;
   if (melds.length === 0 || !pair) return null;
+
   if (pair.suit !== 'honor' && pair.num !== 1 && pair.num !== 9) return null;
+
   const numMelds = melds.filter(m => m.suit !== 'honor');
   if (numMelds.length === 0) return null;
   if (!numMelds.every(m => m.nums.some(n => n === 1 || n === 9))) return null;
+
   return { id: 'mixedTerminal', name: '混帶幺', fan: 30, cat: '大牌', detail: '有字牌，且所有數字面子與將眼都包含么九（1或9）' };
 }
 
@@ -1508,10 +2740,13 @@ function detectAllTerminalFromMelds(melds, hand, pair) {
   const { winds, dragons } = hand;
   if (winds.length > 0 || dragons.length > 0) return null;
   if (melds.length === 0 || !pair) return null;
+
   if (pair.num !== 1 && pair.num !== 9) return null;
+
   const numMelds = melds.filter(m => m.suit !== 'honor');
   if (numMelds.length !== 5) return null;
   if (!numMelds.every(m => m.nums.some(n => n === 1 || n === 9))) return null;
+
   return { id: 'allTerminal', name: '全帶幺', fan: 60, cat: '大牌', detail: '無字牌，所有面子與將眼均帶么九（1或9）' };
 }
 
@@ -1531,151 +2766,323 @@ function isPureOld(suits, winds, dragons) {
   return hasTile;
 }
 
-// ==================== 評估分解（完整保留）====================
 function evaluateDecomposition(decomp, hand) {
   const { melds, pair } = decomp;
+
+  // 修正 #4-B：支援由外部指定出銃牌歸屬（將眼 / 刻子 / 順子），若未指定則按預設順序標記
   const winTileId = window.selectedWinTile ? window.selectedWinTile.id : null;
   if (!window.isSelfDraw && winTileId && !decomp._winAssigned) {
     const pongCandidate = melds.find(m => m.type === '刻子' && m.id === winTileId && !m.isKong);
-    if (pongCandidate) pongCandidate.isWinMeld = true;
-    else {
+    if (pongCandidate) {
+      pongCandidate.isWinMeld = true;
+    } else {
       const seqCandidate = melds.find(m => m.type === '順子' && m.ids && m.ids.includes(winTileId));
-      if (seqCandidate) seqCandidate.isWinMeld = true;
-      else if (pair && pair.id === winTileId) pair.isWinPair = true;
+      if (seqCandidate) {
+        seqCandidate.isWinMeld = true;
+      } else if (pair && pair.id === winTileId) {
+        pair.isWinPair = true;
+      }
     }
   }
-  const matchedIds = []; const dynamicDetails = [];
+
+  const matchedIds = [];
+  const dynamicDetails = [];
   const { suits, winds, dragons, redFlowers, blueFlowers, counts } = hand;
   const allTiles = getAllSelectedTilesForWall();
   const totalFlowers = redFlowers + blueFlowers;
+
   if (totalFlowers > 0) matchedIds.push('eachFlower');
+
   if (winTileId && !window.isSelfDraw) {
     const hasPongWinMeld = melds.some(m => m.type === '刻子' && m.id === winTileId && m.isWinMeld);
-    if (hasPongWinMeld && !(pair && pair.isWinPair)) matchedIds.push('pairPong');
+    if (hasPongWinMeld && !(pair && pair.isWinPair)) {
+      matchedIds.push('pairPong');
+    }
   }
+
   const hasOpenKong = kongSection.some(k => k.type === 'open');
   const hasClosedKong = kongSection.some(k => k.type === 'closed');
   if (openSection.length === 0 && !hasOpenKong) matchedIds.push('closedHand');
-  let openKongCount = 0, closedKongCount = 0;
-  kongSection.forEach(k => { if (k.type === 'open') openKongCount++; else closedKongCount++; });
+
+  let openKongCount = 0;
+  let closedKongCount = 0;
+  kongSection.forEach(k => {
+    if (k.type === 'open') openKongCount++;
+    else closedKongCount++;
+  });
+
   const openMeldCount = Math.floor(openSection.length / 3) + openKongCount;
   const isFullHelp = !hasClosedKong && closedSection.length === 2 && pair && closedSection.filter(id => id === pair.id).length === 2 && openMeldCount === 5;
-  if (isFullHelp) { if (window.isSelfDraw) matchedIds.push('halfHelp'); else matchedIds.push('fullHelp'); }
+  if (isFullHelp) {
+    if (window.isSelfDraw) matchedIds.push('halfHelp');
+    else matchedIds.push('fullHelp');
+  }
+
   const totalKongs = openKongCount + closedKongCount;
-  if (totalKongs === 1) { if (closedKongCount === 1) matchedIds.push('closedKong'); else matchedIds.push('openKong'); }
-  else if (totalKongs === 2) matchedIds.push('twoKong');
+  if (totalKongs === 1) {
+    if (closedKongCount === 1) matchedIds.push('closedKong');
+    else matchedIds.push('openKong');
+  } else if (totalKongs === 2) matchedIds.push('twoKong');
   else if (totalKongs === 3) matchedIds.push('threeKong');
   else if (totalKongs === 4) matchedIds.push('fourKong');
   else if (totalKongs >= 5) matchedIds.push('fiveKong');
+
   let closedTripletsCount = closedKongCount;
   const closedCounts = {};
   closedSection.forEach(id => closedCounts[id] = (closedCounts[id] || 0) + 1);
-  melds.forEach(m => { if (m.type === '刻子' && !m.isWinMeld) { if (m.id && closedCounts[m.id] >= 3) { closedTripletsCount++; closedCounts[m.id] -= 3; } } });
+
+  melds.forEach(m => {
+    if (m.type === '刻子' && !m.isWinMeld) {
+      if (m.id && closedCounts[m.id] >= 3) {
+        closedTripletsCount++;
+        closedCounts[m.id] -= 3;
+      }
+    }
+  });
+
   if (closedTripletsCount === 2) matchedIds.push('twoHidden');
   else if (closedTripletsCount === 3) matchedIds.push('threeHidden');
   else if (closedTripletsCount === 4) matchedIds.push('fourHidden');
   else if (closedTripletsCount >= 5) matchedIds.push('fiveHidden');
-  const hasFlower = totalFlowers > 0; const hasWord = winds.length > 0 || dragons.length > 0;
+
+  const hasFlower = totalFlowers > 0;
+  const hasWord = winds.length > 0 || dragons.length > 0;
   let flatWu = meldListsIsFlat(melds);
+
   const stepResults = detectThreeColorStep(melds, pair);
   const sameStepResults = detectSameColorStep(melds, pair);
   const hasSky = stepResults.some(r => r.name.includes('三色登天'));
   const hasSameSky = sameStepResults.some(r => r.name.includes('同色登天'));
   if (hasSky || hasSameSky) flatWu = false;
-  let isAllSisters = false; let allSistersDetailStr = '';
+
+  let isAllSisters = false;
+  let allSistersDetailStr = '';
   if (meldListsIsFlat(melds) && melds.length === 5) {
     const numCounts = {};
-    melds.forEach(m => { const key = `${m.nums[0]}${m.nums[1]}${m.nums[2]}`; numCounts[key] = (numCounts[key] || 0) + 1; });
+    melds.forEach(m => {
+      const key = `${m.nums[0]}${m.nums[1]}${m.nums[2]}`;
+      numCounts[key] = (numCounts[key] || 0) + 1;
+    });
     const cVals = Object.values(numCounts).sort((a,b)=>a-b);
-    if (cVals.length === 2 && cVals[0] === 2 && cVals[1] === 3) { isAllSisters = true; flatWu = false; allSistersDetailStr = Object.keys(numCounts).map(k => `${k}×${numCounts[k]}組`).join('、'); }
+    if (cVals.length === 2 && cVals[0] === 2 && cVals[1] === 3) {
+      isAllSisters = true;
+      flatWu = false;
+      allSistersDetailStr = Object.keys(numCounts).map(k => `${k}×${numCounts[k]}組`).join('、');
+    }
   }
+
   const dragonMeldCount = melds.filter(m => m.type === '刻子' && ['chung', 'fat', 'bak'].includes(m.id)).length;
   const isDragonPair = pair && ['chung', 'fat', 'bak'].includes(pair.id);
-  if (dragonMeldCount === 3) matchedIds.push('bigThreeDragon');
-  else if (dragonMeldCount === 2 && isDragonPair) matchedIds.push('smallThreeDragon');
+
+  if (dragonMeldCount === 3) {
+    matchedIds.push('bigThreeDragon');
+  } else if (dragonMeldCount === 2 && isDragonPair) {
+    matchedIds.push('smallThreeDragon');
+  }
+
   const windMeldCount = melds.filter(m => m.type === '刻子' && ['east', 'south', 'west', 'north'].includes(m.id)).length;
   const isWindPair = pair && ['east', 'south', 'west', 'north'].includes(pair.id);
-  if (windMeldCount === 4) matchedIds.push('bigFourJoy');
-  else if (windMeldCount === 3 && isWindPair) matchedIds.push('smallFourJoy');
-  else if (windMeldCount === 3) matchedIds.push('bigThreeWind');
-  else if (windMeldCount === 2 && isWindPair) matchedIds.push('smallThreeWind');
+
+  if (windMeldCount === 4) {
+    matchedIds.push('bigFourJoy');
+  } else if (windMeldCount === 3 && isWindPair) {
+    matchedIds.push('smallFourJoy');
+  } else if (windMeldCount === 3) {
+    matchedIds.push('bigThreeWind');
+  } else if (windMeldCount === 2 && isWindPair) {
+    matchedIds.push('smallThreeWind');
+  }
+
   const isWord = isWordOneColor(suits);
   const isBig = isAllBig(counts, winds, dragons);
   const isSmall = isAllSmall(counts, winds, dragons);
+
   if (isBig) matchedIds.push('allBig');
   else if (isSmall) matchedIds.push('allSmall');
-  else { if (!isWord && isMissingFive(counts)) matchedIds.push('missingFive'); }
-  if (isWord) matchedIds.push('wordOneColor');
   else {
+    if (!isWord && isMissingFive(counts)) matchedIds.push('missingFive');
+  }
+
+  if (isWord) {
+    matchedIds.push('wordOneColor');
+  } else {
     if (isPureOneColor(suits, winds, dragons)) matchedIds.push('pureOneColor');
     if (isMixedOneColor(suits, winds, dragons)) matchedIds.push('mixedOneColor');
     if (isPureOld(suits, winds, dragons)) matchedIds.push('pureOld');
     if (isNoTerminal(suits, winds, dragons)) matchedIds.push('noTerminal');
     if (isMissingOne(suits, winds, dragons)) matchedIds.push('missingOne');
   }
+
   const isAllTriplets = !isWord && melds.every(m => m.type === '刻子');
   if (isAllTriplets) {
     const isClosedPong = (openSection.length === 0 && !hasOpenKong);
-    if (window.isSelfDraw && isClosedPong) matchedIds.push('kanKanWu');
-    else matchedIds.push('pongPongWu');
+    if (window.isSelfDraw && isClosedPong) {
+      matchedIds.push('kanKanWu');
+    } else {
+      matchedIds.push('pongPongWu');
+    }
   }
-  const getMeldDoor = (m) => { if (m.suit === 'wan' || m.suit === 'tong' || m.suit === 'so') return m.suit; if (m.id && TILE_MAP[m.id]) return TILE_MAP[m.id].suit; return null; };
-  const getPairDoor = (p) => { if (!p) return null; if (p.suit === 'wan' || p.suit === 'tong' || p.suit === 'so') return p.suit; if (p.id && TILE_MAP[p.id]) return TILE_MAP[p.id].suit; return null; };
-  const meldDoors = new Set(); melds.forEach(m => { const d = getMeldDoor(m); if (d) meldDoors.add(d); });
-  const pDoor = getPairDoor(pair); const allHandDoors = new Set(meldDoors); if (pDoor) allHandDoors.add(pDoor);
+
+  const getMeldDoor = (m) => {
+    if (m.suit === 'wan' || m.suit === 'tong' || m.suit === 'so') return m.suit;
+    if (m.id && TILE_MAP[m.id]) return TILE_MAP[m.id].suit;
+    return null;
+  };
+  const getPairDoor = (p) => {
+    if (!p) return null;
+    if (p.suit === 'wan' || p.suit === 'tong' || p.suit === 'so') return p.suit;
+    if (p.id && TILE_MAP[p.id]) return TILE_MAP[p.id].suit;
+    return null;
+  };
+
+  const meldDoors = new Set();
+  melds.forEach(m => {
+    const d = getMeldDoor(m);
+    if (d) meldDoors.add(d);
+  });
+  const pDoor = getPairDoor(pair);
+  const allHandDoors = new Set(meldDoors);
+  if (pDoor) allHandDoors.add(pDoor);
+
   const hasAllFiveDoors = ['wan', 'tong', 'so', 'wind', 'dragon'].every(d => allHandDoors.has(d));
   if (hasAllFiveDoors) {
     const hasBothFlowers = (redFlowers > 0 && blueFlowers > 0);
-    if (hasBothFlowers) matchedIds.push('bigSevenDoor'); else matchedIds.push('bigFiveDoor');
+    if (hasBothFlowers) {
+      matchedIds.push('bigSevenDoor');
+    } else {
+      matchedIds.push('bigFiveDoor');
+    }
   }
+
   const honorTripletCount = countHonorTriplets(melds);
-  if (!hasFlower && !hasWord && flatWu) matchedIds.push('noWordBigFlat');
-  else {
+
+  if (!hasFlower && !hasWord && flatWu) {
+    matchedIds.push('noWordBigFlat');
+  } else {
     if (!hasFlower && !hasWord) matchedIds.push('noWordFlower');
-    else { if (!hasFlower) matchedIds.push('noFlower'); if (!hasWord) matchedIds.push('noWord'); }
+    else {
+      if (!hasFlower) matchedIds.push('noFlower');
+      if (!hasWord) matchedIds.push('noWord');
+    }
     if (flatWu) matchedIds.push('flatWu');
   }
-  if (pair && pair.suit !== 'honor' && [2, 5, 8].includes(pair.num)) matchedIds.push('eyeTile');
+
+  if (pair && pair.suit !== 'honor' && [2, 5, 8].includes(pair.num)) {
+    matchedIds.push('eyeTile');
+  }
+
   detectChainPongFromMelds(melds, pair).forEach(r => dynamicDetails.push(r));
   detectMixedChainPongFromMelds(melds).forEach(r => dynamicDetails.push(r));
   detectOldYoungPongFromMelds(melds).forEach(r => dynamicDetails.push(r));
   detectFourBackFromMelds(melds, pair, counts).forEach(r => dynamicDetails.push(r));
-  if (isAllSisters) dynamicDetails.push({ id: 'allSisters', name: '全姊妹', fan: 30, cat: '組合', detail: `5組順子為 ${allSistersDetailStr}（AAAx2 + BBBx3）` });
+
+  if (isAllSisters) {
+    dynamicDetails.push({
+      id: 'allSisters',
+      name: '全姊妹',
+      fan: 30,
+      cat: '組合',
+      detail: `5組順子為 ${allSistersDetailStr}（AAAx2 + BBBx3）`
+    });
+  }
+
   const threeMeetData = detectThreeMeetFromMelds(melds, pair);
   const threeMeetKeys = threeMeetData.threeMeetKeys;
   threeMeetData.results.forEach(r => dynamicDetails.push(r));
+
   const sistersResult = detectSistersFromMelds(melds, threeMeetKeys);
   if (sistersResult) dynamicDetails.push(sistersResult);
+
   detectPairHighFromMelds(melds).forEach(r => dynamicDetails.push(r));
   detectDragonsFromMelds(melds, pair).forEach(r => dynamicDetails.push(r));
   sameStepResults.forEach(r => dynamicDetails.push(r));
   stepResults.forEach(r => dynamicDetails.push(r));
+
   const mixedTerminalResult = !isWord ? detectMixedTerminalFromMelds(melds, hand, pair) : null;
   if (mixedTerminalResult) dynamicDetails.push(mixedTerminalResult);
+
   const allTerminalResult = !isWord ? detectAllTerminalFromMelds(melds, hand, pair) : null;
   if (allTerminalResult) dynamicDetails.push(allTerminalResult);
-  if (!isWord) detectMixedWithXFromMelds(melds, allTiles, hand, pair).forEach(r => dynamicDetails.push(r));
+
+  if (!isWord) {
+    detectMixedWithXFromMelds(melds, allTiles, hand, pair).forEach(r => dynamicDetails.push(r));
+  }
+
   const winPatterns = detectWinPatterns(hand, window.selectedWinTile, decomp);
-  if (winPatterns.items.length > 0) winPatterns.items.forEach(item => dynamicDetails.push(item));
+  if (winPatterns.items.length > 0) {
+    winPatterns.items.forEach(item => dynamicDetails.push(item));
+  }
+
   const uniqueMatchedIds = [...new Set(matchedIds)];
-  let total = 0; let flowerFanTotal = 0; const detail = [];
+  let total = 0;
+  let flowerFanTotal = 0;
+  const detail = [];
+
   uniqueMatchedIds.forEach(id => {
     const f = FAN_MAP[id];
-    if (f) {
-      if (id === 'eachFlower') { const flowerFan = totalFlowers * f.fan; flowerFanTotal += flowerFan; detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' }); }
-      else { total += f.fan; detail.push({ ...f }); }
+    if (f) { 
+      if (id === 'eachFlower') {
+        const flowerFan = totalFlowers * f.fan;
+        flowerFanTotal += flowerFan;
+        detail.push({ id: 'eachFlower', name: `花 (紅:${redFlowers}, 藍:${blueFlowers}) ×${totalFlowers}`, fan: flowerFan, cat: '花摸' });
+      } else {
+        total += f.fan; 
+        detail.push({ ...f }); 
+      }
     }
   });
+
   total += flowerFanTotal;
-  if (honorTripletCount > 0) { const wordFan = honorTripletCount * 2; total += wordFan; detail.push({ id: 'wordTile', name: `字（每組字刻 +2）×${honorTripletCount}組`, fan: wordFan, cat: '花摸', detail: `${honorTripletCount} 組字牌刻子，每組 +2 番` }); }
-  dynamicDetails.forEach(item => { total += item.fan; detail.push(item); });
+
+  if (honorTripletCount > 0) {
+    const wordFan = honorTripletCount * 2;
+    total += wordFan;
+    detail.push({
+      id: 'wordTile',
+      name: `字（每組字刻 +2）×${honorTripletCount}組`,
+      fan: wordFan,
+      cat: '花摸',
+      detail: `${honorTripletCount} 組字牌刻子，每組 +2 番`
+    });
+  }
+
+  dynamicDetails.forEach(item => {
+    total += item.fan;
+    detail.push(item);
+  });
+
   const nonFlowerItems = detail.filter(item => item.id !== 'eachFlower');
   const pendingBonusKeys = window.pendingCfBonus ? Object.keys(window.pendingCfBonus) : [];
   const hasNonSelfDrawBonus = pendingBonusKeys.some(k => k !== 'selfDraw');
+
   if (totalFlowers === 1 && nonFlowerItems.length === 0 && !hasNonSelfDrawBonus) {
-    if (window.isSelfDraw) return { total: 15, detail: [{ id: 'duckWu', name: '鴨糊', fan: 15, cat: '組合', detail: '自摸只有 1 隻花且全牌無任何其他番數（直計鴨糊15番，不另計自摸）' }], decomp };
-    else return { total: 30, detail: [{ id: 'chickenWu', name: '雞糊', fan: 30, cat: '組合', detail: '只有 1 隻花且全牌無任何其他番數（直計雞糊30番）' }], decomp };
+    if (window.isSelfDraw) {
+      return {
+        total: 15,
+        detail: [{
+          id: 'duckWu',
+          name: '鴨糊',
+          fan: 15,
+          cat: '組合',
+          detail: '自摸只有 1 隻花且全牌無任何其他番數（直計鴨糊15番，不另計自摸）'
+        }],
+        decomp
+      };
+    } else {
+      return {
+        total: 30,
+        detail: [{
+          id: 'chickenWu',
+          name: '雞糊',
+          fan: 30,
+          cat: '組合',
+          detail: '只有 1 隻花且全牌無任何其他番數（直計雞糊30番）'
+        }],
+        decomp
+      };
+    }
   }
+
   const filtered = applyMaxOnlyRule(detail);
   const newTotal = filtered.reduce((s, d) => s + (d.fan || 0), 0);
   return { total: newTotal, detail: filtered, decomp };
@@ -1684,154 +3091,343 @@ function evaluateDecomposition(decomp, hand) {
 function checkFanInDetail(detailList, id) {
   if (!detailList) return false;
   const expanded = [];
-  detailList.forEach(f => { if (f.items && Array.isArray(f.items)) f.items.forEach(i => expanded.push(i)); else expanded.push(f); });
+  detailList.forEach(f => {
+    if (f.items && Array.isArray(f.items)) f.items.forEach(i => expanded.push(i));
+    else expanded.push(f);
+  });
   return expanded.some(f => f.id === id);
 }
 
 function applyToggleBonusLogic(key, targetDetail = baseResultDetail) {
   if (key === 'selfDraw') {
-    if (checkFanInDetail(targetDetail, 'duckWu')) { delete bonusState.selfDraw; return; }
-    if (bonusState.selfDraw !== undefined) delete bonusState.selfDraw;
-    else { const isClosed = checkFanInDetail(targetDetail, 'closedHand') || checkFanInDetail(targetDetail, 'closedSelfDraw'); bonusState.selfDraw = isClosed ? 3 : 1; }
+    if (checkFanInDetail(targetDetail, 'duckWu')) {
+      delete bonusState.selfDraw;
+      return;
+    }
+    if (bonusState.selfDraw !== undefined) {
+      delete bonusState.selfDraw;
+    } else {
+      const isClosed = checkFanInDetail(targetDetail, 'closedHand') || checkFanInDetail(targetDetail, 'closedSelfDraw');
+      bonusState.selfDraw = isClosed ? 3 : 1;
+    }
     return;
   }
+
   if (key === 'ding') {
-    if (bonusState.ding !== undefined) delete bonusState.ding;
-    else { const isMustClosed = checkFanInDetail(targetDetail, 'sixteenNoMatch') || checkFanInDetail(targetDetail, 'thirteenOrphan') || checkFanInDetail(targetDetail, 'luckyGulu'); if (isMustClosed) bonusState.ding = 5; else { const isClosed = checkFanInDetail(targetDetail, 'closedHand') || checkFanInDetail(targetDetail, 'closedSelfDraw'); bonusState.ding = isClosed ? 10 : 5; } }
+    if (bonusState.ding !== undefined) {
+      delete bonusState.ding;
+    } else {
+      const isMustClosed = checkFanInDetail(targetDetail, 'sixteenNoMatch') || checkFanInDetail(targetDetail, 'thirteenOrphan') || checkFanInDetail(targetDetail, 'luckyGulu');
+      if (isMustClosed) {
+        bonusState.ding = 5;
+      } else {
+        const isClosed = checkFanInDetail(targetDetail, 'closedHand') || checkFanInDetail(targetDetail, 'closedSelfDraw');
+        bonusState.ding = isClosed ? 10 : 5;
+      }
+    }
     return;
   }
+
   const fanMap = {
-    dingJik: 5, robKong: 5, doubleWin: 5, tripleWin: 10, seaFish: 5, riverFish: 3,
+    dingJik: 5, robKong: 5, doubleWin: 5, tripleWin: 10,
+    seaFish: 5, riverFish: 3,
     flower1: 1, flower2: 5, flower3: 10, flower4: 20, flower5: 40, flower6: 70, flower7: 100, flower8: 140,
     kong1: 1, kong2: 5, kong3: 10, kong4: 25, kong5: 50,
     flowerKong1: 8, flowerKong3: 15, flowerKong4: 25, flowerKong5: 50, flowerKong6: 80, flowerKong7: 120
   };
-  if (fanMap[key] !== undefined) { if (bonusState[key] !== undefined) delete bonusState[key]; else bonusState[key] = fanMap[key]; }
+  if (fanMap[key] !== undefined) {
+    if (bonusState[key] !== undefined) delete bonusState[key];
+    else bonusState[key] = fanMap[key];
+  }
 }
 
 function applyPendingCfBonus() {
   if (!window.pendingCfBonus) return;
-  const pending = window.pendingCfBonus; window.pendingCfBonus = null;
+  const pending = window.pendingCfBonus;
+  window.pendingCfBonus = null;
+
   if (bonusStateByVariant && resultData && resultData.variants) {
-    bonusStateByVariant.forEach((bs, idx) => { currentVariantIndex = idx; bonusState = bs; const vDetail = resultData.variants[idx].detail; for (const key in pending) applyToggleBonusLogic(key, vDetail); });
-    currentVariantIndex = 0; bonusState = bonusStateByVariant[0];
-  } else { bonusState = {}; for (const key in pending) applyToggleBonusLogic(key, baseResultDetail); }
+    bonusStateByVariant.forEach((bs, idx) => {
+      currentVariantIndex = idx;
+      bonusState = bs;
+      const vDetail = resultData.variants[idx].detail;
+      for (const key in pending) {
+        applyToggleBonusLogic(key, vDetail);
+      }
+    });
+    currentVariantIndex = 0;
+    bonusState = bonusStateByVariant[0];
+  } else {
+    bonusState = {};
+    for (const key in pending) {
+      applyToggleBonusLogic(key, baseResultDetail);
+    }
+  }
 }
 
 function calculateSafe() {
   try {
     const totalTilesCount = openSection.length + closedSection.length + (kongSection.length * 3);
-    if (totalTilesCount !== 17) { showToast(`牌數不符（目前計算張數 ${totalTilesCount} 張，總計須為 17 張）`); return; }
+    if (totalTilesCount !== 17) {
+      showToast(`牌數不符（目前計算張數 ${totalTilesCount} 張，總計須為 17 張）`);
+      return;
+    }
+
     const hand = analyzeHand();
     const counts = hand.counts;
+
     const hiddenAndOpenTiles = [...openSection, ...closedSection];
     const countsForDecomp = {};
     hiddenAndOpenTiles.forEach(id => countsForDecomp[id] = (countsForDecomp[id]||0)+1);
+
     const candidates = [];
+
+    // 修正 #4-D：展開出銃食胡牌在「將眼 / 刻子 / 順子」的所有可能歸屬並取最高番數
     const decompositions = getAllDecompositions(countsForDecomp);
     if (decompositions.length > 0) {
       let bestResult = { total: -1, detail: [] };
       const winTileId = window.selectedWinTile ? window.selectedWinTile.id : null;
+
       for (const decomp of decompositions) {
         const baseMelds = decomp.melds.map(m => ({ ...m, nums: [...m.nums], ids: m.ids ? [...m.ids] : undefined }));
-        kongSection.forEach(k => { const t = TILE_MAP[k.id]; const mSuit = (t.type === 'honor') ? 'honor' : t.suit; baseMelds.push({ type: '刻子', nums: [t.num, t.num, t.num], suit: mSuit, id: k.id, isKong: true }); });
+        kongSection.forEach(k => {
+          const t = TILE_MAP[k.id];
+          const mSuit = (t.type === 'honor') ? 'honor' : t.suit;
+          baseMelds.push({ type: '刻子', nums: [t.num, t.num, t.num], suit: mSuit, id: k.id, isKong: true });
+        });
+
         if (!window.isSelfDraw && winTileId && window.selectedWinTile?.sec === 'closed') {
           const targets = [];
-          if (decomp.pair && decomp.pair.id === winTileId) targets.push({ type: 'pair' });
-          baseMelds.forEach((m, idx) => { if (m.isKong) return; if (m.type === '刻子' && m.id === winTileId) targets.push({ type: 'meld', idx }); else if (m.type === '順子' && m.ids && m.ids.includes(winTileId)) targets.push({ type: 'meld', idx }); });
+          if (decomp.pair && decomp.pair.id === winTileId) {
+            targets.push({ type: 'pair' });
+          }
+          baseMelds.forEach((m, idx) => {
+            if (m.isKong) return;
+            if (m.type === '刻子' && m.id === winTileId) targets.push({ type: 'meld', idx });
+            else if (m.type === '順子' && m.ids && m.ids.includes(winTileId)) targets.push({ type: 'meld', idx });
+          });
+
           if (targets.length > 0) {
             for (const target of targets) {
               const clonedMelds = baseMelds.map(m => ({ ...m, nums: [...m.nums], ids: m.ids ? [...m.ids] : undefined }));
               const clonedPair = { ...decomp.pair };
-              if (target.type === 'pair') clonedPair.isWinPair = true; else clonedMelds[target.idx].isWinMeld = true;
+              if (target.type === 'pair') clonedPair.isWinPair = true;
+              else clonedMelds[target.idx].isWinMeld = true;
+
               const res = evaluateDecomposition({ pair: clonedPair, melds: clonedMelds, _winAssigned: true }, hand);
               if (res.total > bestResult.total) bestResult = res;
             }
             continue;
           }
         }
+
         const fullDecomp = { pair: { ...decomp.pair }, melds: baseMelds };
         const res = evaluateDecomposition(fullDecomp, hand);
         if (res.total > bestResult.total) bestResult = res;
       }
       candidates.push(bestResult);
     }
-    const guluResult = evaluateLuckyGulu(counts, hand); if (guluResult) candidates.push(guluResult);
-    const noMatchResult = evaluateSixteenNoMatch(counts, hand); if (noMatchResult) candidates.push(noMatchResult);
-    const orphanResult = evaluateThirteenOrphan(counts, hand); if (orphanResult) candidates.push(orphanResult);
+
+    const guluResult = evaluateLuckyGulu(counts, hand);
+    if (guluResult) {
+      candidates.push(guluResult);
+    }
+
+    const noMatchResult = evaluateSixteenNoMatch(counts, hand);
+    if (noMatchResult) {
+      candidates.push(noMatchResult);
+    }
+
+    const orphanResult = evaluateThirteenOrphan(counts, hand);
+    if (orphanResult) {
+      candidates.push(orphanResult);
+    }
+
     if (candidates.length > 0) {
       let best = candidates[0];
-      for (let i = 1; i < candidates.length; i++) if (candidates[i].total > best.total) best = candidates[i];
+      for (let i = 1; i < candidates.length; i++) {
+        if (candidates[i].total > best.total) {
+          best = candidates[i];
+        }
+      }
+
       const guluCand = candidates.find(c => c.detail.some(d => d.id === 'luckyGulu'));
       const normalCand = candidates.find(c => !c.detail.some(d => d.id === 'luckyGulu' || d.id === 'sixteenNoMatch' || d.id === 'thirteenOrphan'));
+
       if (guluCand && normalCand) {
         const sharedIds = ['eachFlower', 'noFlower', 'noWord', 'noWordFlower', 'wordTile', 'realSingle', 'fakeSingle'];
-        const guluFilteredDetail = []; let guluDeduct = 0;
-        guluCand.detail.forEach(d => { if (sharedIds.includes(d.id)) { guluDeduct += d.fan; return; } guluFilteredDetail.push(d); });
-        const guluFiltered = { total: guluCand.total - guluDeduct, detail: guluFilteredDetail, label: '嚦咕嚦咕' };
-        const variants = [{ total: normalCand.total, detail: normalCand.detail, label: '一般牌型', decomp: normalCand.decomp }, guluFiltered];
+        const guluFilteredDetail = [];
+        let guluDeduct = 0;
+        guluCand.detail.forEach(d => {
+          if (sharedIds.includes(d.id)) {
+            guluDeduct += d.fan;
+            return;
+          }
+          guluFilteredDetail.push(d);
+        });
+
+        const guluFiltered = {
+          total: guluCand.total - guluDeduct,
+          detail: guluFilteredDetail,
+          label: '嚦咕嚦咕'
+        };
+
+        const variants = [
+          { total: normalCand.total, detail: normalCand.detail, label: '一般牌型', decomp: normalCand.decomp },
+          guluFiltered
+        ];
+
         resultData = { variants, handTiles: getAllSelectedTilesForWall(), winTile: window.selectedWinTile || null };
-        baseResultTotal = variants[0].total; baseResultDetail = variants[0].detail;
-        bonusStateByVariant = variants.map(() => ({})); currentVariantIndex = 0; bonusState = bonusStateByVariant[0];
+        baseResultTotal = variants[0].total;
+        baseResultDetail = variants[0].detail;
+        bonusStateByVariant = variants.map(() => ({}));
+        currentVariantIndex = 0;
+        bonusState = bonusStateByVariant[0];
         applyPendingCfBonus();
         renderResultBody(variants[0].total, variants[0].detail, variants, 0);
         switchTab('result', document.querySelectorAll('.tab')[1]);
         document.getElementById('resultPanel').classList.add('show');
         return;
       }
+
       resultData = { total: best.total, detail: best.detail, handTiles: getAllSelectedTilesForWall(), winTile: window.selectedWinTile || null };
-      baseResultTotal = best.total; baseResultDetail = best.detail; bonusState = {}; bonusStateByVariant = null; currentVariantIndex = 0;
+      baseResultTotal = best.total;
+      baseResultDetail = best.detail;
+      bonusState = {};
+      bonusStateByVariant = null;
+      currentVariantIndex = 0;
       applyPendingCfBonus();
       renderResult(best.total, best.detail);
       switchTab('result', document.querySelectorAll('.tab')[1]);
       document.getElementById('resultPanel').classList.add('show');
       return;
     }
+
     resultData = { total: 0, detail: [], handTiles: getAllSelectedTilesForWall(), winTile: window.selectedWinTile || null };
-    baseResultTotal = 0; baseResultDetail = []; bonusState = {}; bonusStateByVariant = null; currentVariantIndex = 0;
+    baseResultTotal = 0;
+    baseResultDetail = [];
+    bonusState = {};
+    bonusStateByVariant = null;
+    currentVariantIndex = 0;
     renderResult(0, []);
     switchTab('result', document.querySelectorAll('.tab')[1]);
     document.getElementById('resultPanel').classList.add('show');
-  } catch (err) { console.error(err); alert("計算過程發生例外錯誤：" + err.message); }
+  } catch (err) {
+    console.error(err);
+    alert("計算過程發生例外錯誤：" + err.message);
+  }
 }
 
-function getBonusFanTotal() { let total = 0; for (const key in bonusState) if (bonusState[key]) total += bonusState[key]; return total; }
-function hasBaseFan(id) { return checkFanInDetail(baseResultDetail, id); }
-function toggleBonus(key, fan) { applyToggleBonusLogic(key, baseResultDetail); updateBonusButtons(); recalcBonus(); }
-function updateBonusButtons() { document.querySelectorAll('.bonus-btn').forEach(btn => { const key = btn.dataset.bonus; if (bonusState[key] !== undefined && bonusState[key] !== null) btn.classList.add('active'); else btn.classList.remove('active'); }); }
+function getBonusFanTotal() {
+  let total = 0;
+  for (const key in bonusState) {
+    if (bonusState[key]) total += bonusState[key];
+  }
+  return total;
+}
+
+function hasBaseFan(id) {
+  return checkFanInDetail(baseResultDetail, id);
+}
+
+function toggleBonus(key, fan) {
+  applyToggleBonusLogic(key, baseResultDetail);
+  updateBonusButtons();
+  recalcBonus();
+}
+
+function updateBonusButtons() {
+  document.querySelectorAll('.bonus-btn').forEach(btn => {
+    const key = btn.dataset.bonus;
+    if (bonusState[key] !== undefined && bonusState[key] !== null) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
 
 function recalcBonus() {
-  const bonusTotal = getBonusFanTotal(); const newTotal = baseResultTotal + bonusTotal;
+  const bonusTotal = getBonusFanTotal();
+  const newTotal = baseResultTotal + bonusTotal;
+
   if (bonusStateByVariant && resultData && resultData.variants) {
     const chips = document.querySelectorAll('.variant-chip');
-    if (chips[currentVariantIndex]) chips[currentVariantIndex].textContent = newTotal;
-  } else { const totalEl = document.querySelector('.result-total .num'); if (totalEl) totalEl.textContent = newTotal; }
+    if (chips[currentVariantIndex]) {
+      chips[currentVariantIndex].textContent = newTotal;
+    }
+  } else {
+    const totalEl = document.querySelector('.result-total .num');
+    if (totalEl) totalEl.textContent = newTotal;
+  }
 }
 
 function switchVariant(idx) {
   if (!bonusStateByVariant) return;
-  bonusStateByVariant[currentVariantIndex] = bonusState; currentVariantIndex = idx; bonusState = bonusStateByVariant[idx];
-  const active = resultData.variants[idx]; baseResultTotal = active.total; baseResultDetail = active.detail;
-  renderResultBody(active.total, active.detail, resultData.variants, idx); recalcBonus(); updateBonusButtons();
+  bonusStateByVariant[currentVariantIndex] = bonusState;
+  currentVariantIndex = idx;
+  bonusState = bonusStateByVariant[idx];
+  const active = resultData.variants[idx];
+  baseResultTotal = active.total;
+  baseResultDetail = active.detail;
+  renderResultBody(active.total, active.detail, resultData.variants, idx);
+  recalcBonus();
+  updateBonusButtons();
 }
 
-function renderResult(total, detail) { renderResultBody(total, detail, null, 0); }
+function renderResult(total, detail) {
+  renderResultBody(total, detail, null, 0);
+}
 
 function renderResultBody(total, detail, variants, activeIdx) {
-  const body = document.getElementById('resultBody'); const container = document.getElementById('resultContainer');
+  const body = document.getElementById('resultBody');
+  const container = document.getElementById('resultContainer');
+
   if (detail.length === 0) {
-    const emptyHTML = `<div class="result-total"><div class="num">0</div><div class="label">番</div></div><div class="result-none">未偵測到任何合法食胡牌型<br>請確認各分區配置是否正確（是否符合面子結構）</div>`;
-    body.innerHTML = emptyHTML; if (container) container.innerHTML = emptyHTML; return;
+    const emptyHTML = `
+      <div class="result-total"><div class="num">0</div><div class="label">番</div></div>
+      <div class="result-none">未偵測到任何合法食胡牌型<br>請確認各分區配置是否正確（是否符合面子結構）</div>
+    `;
+    body.innerHTML = emptyHTML;
+    if (container) container.innerHTML = emptyHTML;
+    return;
   }
+
   const bonusItems = [];
-  const bonusLabels = { selfDraw: '自摸', ding: '叮', dingJik: '叮即', robKong: '搶槓', doubleWin: '雙響', tripleWin: '三響', seaFish: '海底撈月', riverFish: '河底撈月', flower1: '花摸1', flower2: '花摸2', flower3: '花摸3', flower4: '花摸4', flower5: '花摸5', flower6: '花摸6', flower7: '花摸7', flower8: '花摸8', kong1: '槓摸1', kong2: '槓摸2', kong3: '槓摸3', kong4: '槓摸4', kong5: '槓摸5', flowerKong1: '花槓', flowerKong3: '花槓3', flowerKong4: '花槓4', flowerKong5: '花槓5', flowerKong6: '花槓6', flowerKong7: '花槓7' };
-  for (const k in bonusState) { if (bonusState[k] !== undefined && bonusState[k] > 0) { const cat = k.startsWith('flower') ? '花摸' : (k.startsWith('kong') ? '槓摸' : '基本'); bonusItems.push({ id: k, name: bonusLabels[k] || k, fan: bonusState[k], cat: cat, detail: '加番設定' }); } }
+  const bonusLabels = {
+    selfDraw: '自摸', ding: '叮', dingJik: '叮即', robKong: '搶槓', doubleWin: '雙響', tripleWin: '三響',
+    seaFish: '海底撈月', riverFish: '河底撈月',
+    flower1: '花摸1', flower2: '花摸2', flower3: '花摸3', flower4: '花摸4', flower5: '花摸5', flower6: '花摸6', flower7: '花摸7', flower8: '花摸8',
+    kong1: '槓摸1', kong2: '槓摸2', kong3: '槓摸3', kong4: '槓摸4', kong5: '槓摸5',
+    flowerKong1: '花槓', flowerKong3: '花槓3', flowerKong4: '花槓4', flowerKong5: '花槓5', flowerKong6: '花槓6', flowerKong7: '花槓7'
+  };
+
+  for (const k in bonusState) {
+    if (bonusState[k] !== undefined && bonusState[k] > 0) {
+      const cat = k.startsWith('flower') ? '花摸' : (k.startsWith('kong') ? '槓摸' : '基本');
+      bonusItems.push({
+        id: k,
+        name: bonusLabels[k] || k,
+        fan: bonusState[k],
+        cat: cat,
+        detail: '加番設定'
+      });
+    }
+  }
+
   const combinedDetail = [...detail, ...bonusItems];
   const finalDisplayTotal = total + getBonusFanTotal();
+
   const grouped = {};
-  combinedDetail.forEach(f => { const cat = f.cat || '其他'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(f); });
+  combinedDetail.forEach(f => {
+    const cat = f.cat || '其他';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(f);
+  });
+
   const catOrder = ['花摸','槓摸','基本','組合','大牌','額外'];
   const sortedCats = Object.keys(grouped).sort((a,b) => catOrder.indexOf(a) - catOrder.indexOf(b));
+
   let headerHTML = '';
   if (variants && variants.length > 1) {
     const parts = variants.map((v, i) => {
@@ -1839,20 +3435,62 @@ function renderResultBody(total, detail, variants, activeIdx) {
       const vBonusTotal = Object.values(bonusStateByVariant[i]||{}).reduce((a,b)=>a+b,0);
       return `<span class="${activeCls}" onclick="switchVariant(${i})">${v.total + vBonusTotal}</span>`;
     }).join('<span class="variant-plus">+</span>');
-    headerHTML = `<div class="result-total"><div class="num" style="font-size:34px;">【${parts}】</div><div class="label">雙食嚦咕（點擊切換查看；花／字只計一次）</div></div>`;
+    headerHTML = `
+      <div class="result-total">
+        <div class="num" style="font-size:34px;">【${parts}】</div>
+        <div class="label">雙食嚦咕（點擊切換查看；花／字只計一次）</div>
+      </div>
+    `;
   } else {
-    headerHTML = `<div class="result-total"><div class="num">${finalDisplayTotal}</div><div class="label">總番數（基礎番數 + 加番）</div></div>`;
+    headerHTML = `
+      <div class="result-total">
+        <div class="num">${finalDisplayTotal}</div>
+        <div class="label">總番數（基礎番數 + 加番）</div>
+      </div>
+    `;
   }
+
   let winTileHTML = '';
   const wt = resultData && resultData.winTile;
   if (wt && TILE_MAP[wt.id]) {
     const t = TILE_MAP[wt.id];
-    const inner = t.img ? `<img src="${t.img}" alt="${t.label}" style="width:32px;height:44px;object-fit:contain;">` : `<span class="${t.type === 'num' ? 'num' : 'honor'} ${t.color || 'black'}" style="font-size:18px;">${t.label}</span>`;
+    const inner = t.img
+      ? `<img src="${t.img}" alt="${t.label}" style="width:32px;height:44px;object-fit:contain;">`
+      : `<span class="${t.type === 'num' ? 'num' : 'honor'} ${t.color || 'black'}" style="font-size:18px;">${t.label}</span>`;
     winTileHTML = `<div style="text-align:center;margin-bottom:10px;font-size:12px;color:#aaa;">食胡牌：<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:46px;background:#f5f5f0;border-radius:5px;border:2px solid #ffd200;vertical-align:middle;">${inner}</span></div>`;
   }
-  const resultItemsHTML = `${headerHTML}${winTileHTML}${sortedCats.map(cat => `<div style="font-size:12px;color:#f7971e;font-weight:700;padding:8px 4px 4px;">${cat}</div>${grouped[cat].map(f => `<div class="result-item highlight"><div><div class="r-name">${f.name}</div>${f.detail ? `<div style="font-size:10px;color:#888;margin-top:2px;">${f.detail}</div>` : ''}</div><span class="r-fan">+${f.fan}番</span></div>`).join('')}`).join('')}`;
-  body.innerHTML = `${resultItemsHTML}<div style="display:flex;gap:8px;margin-top:12px;"><button onclick="saveResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 儲存本局</button><button onclick="closeResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:#16213e;color:#ffd200;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #f7971e55;">返回</button></div>`;
-  if (container) container.innerHTML = `<div style="padding:10px;">${resultItemsHTML}</div>`;
+
+  const resultItemsHTML = `
+    ${headerHTML}
+    ${winTileHTML}
+    ${sortedCats.map(cat => `
+      <div style="font-size:12px;color:#f7971e;font-weight:700;padding:8px 4px 4px;">${cat}</div>${grouped[cat].map(f => `
+        <div class="result-item highlight">
+          <div>
+            <div class="r-name">${f.name}</div>
+            ${f.detail ? `<div style="font-size:10px;color:#888;margin-top:2px;">${f.detail}</div>` : ''}
+          </div>
+          <span class="r-fan">+${f.fan}番</span>
+        </div>
+      `).join('')}
+    `).join('')}
+  `;
+
+  body.innerHTML = `
+    ${resultItemsHTML}
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="saveResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 儲存本局</button>
+      <button onclick="closeResult()" style="flex:1;padding:12px;border-radius:10px;border:none;background:#16213e;color:#ffd200;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #f7971e55;">返回</button>
+    </div>
+  `;
+
+  if (container) {
+    container.innerHTML = `
+      <div style="padding:10px;">
+        ${resultItemsHTML}
+      </div>
+    `;
+  }
 }
 
 function closeResult() { document.getElementById('resultPanel').classList.remove('show'); }
@@ -1861,169 +3499,73 @@ function saveResult() {
   if (!resultData) return;
   const now = new Date();
   const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
   if (resultData.variants) {
-    const parts = resultData.variants.map((v, i) => { const bs = bonusStateByVariant[i] || {}; let bTotal = 0; for (const k in bs) if (bs[k]) bTotal += bs[k]; return { total: v.total + bTotal, detail: v.detail, label: v.label }; });
-    historyData.unshift({ total: `【${parts.map(p => p.total).join('+')}】`, details: parts.map(p => `${p.label}：${p.detail.map(f => `${f.name}(${f.fan}番)`).join('、')}`).join(' ｜ '), time: timeStr, tiles: `花(紅:${redFlowerCount},藍:${blueFlowerCount}) | ` + resultData.handTiles.map(id => TILE_MAP[id]?.label || '?').join(' ') });
-    renderHistory(); showToast(`已儲存：${parts.map(p => p.total).join('+')}番`); closeResult(); resultData = null; bonusStateByVariant = null; return;
+    const parts = resultData.variants.map((v, i) => {
+      const bs = bonusStateByVariant[i] || {};
+      let bTotal = 0;
+      for (const k in bs) if (bs[k]) bTotal += bs[k];
+      const finalTotal = v.total + bTotal;
+      return { total: finalTotal, detail: v.detail, label: v.label };
+    });
+    historyData.unshift({
+      total: `【${parts.map(p => p.total).join('+')}】`,
+      details: parts.map(p => `${p.label}：${p.detail.map(f => `${f.name}(${f.fan}番)`).join('、')}`).join(' ｜ '),
+      time: timeStr,
+      tiles: `花(紅:${redFlowerCount},藍:${blueFlowerCount}) | ` + resultData.handTiles.map(id => TILE_MAP[id]?.label || '?').join(' ')
+    });
+    renderHistory();
+    showToast(`已儲存：${parts.map(p => p.total).join('+')}番`);
+    closeResult();
+    resultData = null;
+    bonusStateByVariant = null;
+    return;
   }
-  const bonusTotal = getBonusFanTotal(); const finalTotal = baseResultTotal + bonusTotal;
+
+  const bonusTotal = getBonusFanTotal();
+  const finalTotal = baseResultTotal + bonusTotal;
   const bonusDesc = Object.keys(bonusState).filter(k => bonusState[k] > 0).map(k => `${k}(${bonusState[k]}番)`).join('、');
-  historyData.unshift({ total: finalTotal, details: resultData.detail.map(f => `${f.name}(${f.fan}番)`).join('、') + (bonusDesc ? ' + 加番：' + bonusDesc : ''), time: timeStr, tiles: `花(紅:${redFlowerCount},藍:${blueFlowerCount}) | ` + resultData.handTiles.map(id => TILE_MAP[id]?.label || '?').join(' ') });
-  renderHistory(); showToast(`已儲存：${finalTotal}番`); closeResult(); resultData = null;
+  historyData.unshift({
+    total: finalTotal,
+    details: resultData.detail.map(f => `${f.name}(${f.fan}番)`).join('、') + (bonusDesc ? ' + 加番：' + bonusDesc : ''),
+    time: timeStr,
+    tiles: `花(紅:${redFlowerCount},藍:${blueFlowerCount}) | ` + resultData.handTiles.map(id => TILE_MAP[id]?.label || '?').join(' ')
+  });
+  renderHistory();
+  showToast(`已儲存：${finalTotal}番`);
+  closeResult();
+  resultData = null;
 }
 
 function renderHistory() {
   const list = document.getElementById('historyList');
   document.getElementById('historyCount').textContent = historyData.length;
   if (historyData.length === 0) { list.innerHTML = '<div class="empty-state">暫無紀錄</div>'; return; }
-  list.innerHTML = historyData.map(h => `<div class="history-item"><div class="h-total">${h.total} 番</div><div class="h-detail">${h.details}</div><div class="h-time">${h.time}</div><div class="h-time" style="color:#556;">🀫 ${h.tiles}</div></div>`).join('');
+  list.innerHTML = historyData.map(h => `
+    <div class="history-item">
+      <div class="h-total">${h.total} 番</div>
+      <div class="h-detail">${h.details}</div>
+      <div class="h-time">${h.time}</div>
+      <div class="h-time" style="color:#556;">🀫 ${h.tiles}</div>
+    </div>
+  `).join('');
 }
 
-function toggleHistory() { const panel = document.getElementById('historyPanel'); panel.classList.toggle('show'); renderHistory(); }
+function toggleHistory() {
+  const panel = document.getElementById('historyPanel');
+  panel.classList.toggle('show');
+  renderHistory();
+}
 
 let toastTimer;
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1300); }
-
-// ==================== AI 辨牌功能 ====================
-let aiImageData = null;
-let aiImageFile = null;
-let aiDetectedTiles = [];
-
-const ZHIPU_API_KEY = '09c5fe9734b24d01a242f9719b0e18ee.yaTCcHxKk13Cwp2K'; // 請替換為你的實際 API Key
-const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-const AI_MODEL = 'glm-4v-flash';
-
-function openAIPanel() {
-  document.getElementById('aiOverlay').classList.add('show');
-  document.getElementById('aiStatus').textContent = '等待上傳圖片⋯';
-  document.getElementById('aiResultList').innerHTML = '';
-  document.getElementById('aiDetectBtn').disabled = true;
-  document.getElementById('aiPlaceholder').style.display = 'flex';
-  document.getElementById('aiPlaceholder').textContent = '📷 點擊上傳或拍攝手牌照片';
-  const imgEl = document.querySelector('#aiPreview img');
-  if (imgEl) imgEl.remove();
-  aiImageData = null;
-  aiImageFile = null;
-  aiDetectedTiles = [];
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1300);
 }
 
-function closeAIPanel() { document.getElementById('aiOverlay').classList.remove('show'); }
-
-function handleAIImage(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    aiImageData = e.target.result;
-    aiImageFile = file;
-    const preview = document.getElementById('aiPreview');
-    const placeholder = document.getElementById('aiPlaceholder');
-    placeholder.style.display = 'none';
-    const oldImg = preview.querySelector('img');
-    if (oldImg) oldImg.remove();
-    const img = document.createElement('img');
-    img.src = aiImageData;
-    img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px;';
-    preview.appendChild(img);
-    document.getElementById('aiStatus').textContent = '圖片已載入，點擊「開始辨識」';
-    document.getElementById('aiDetectBtn').disabled = false;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function runAIDetect() {
-  if (!aiImageData) { showToast('請先上傳圖片'); return; }
-  const statusEl = document.getElementById('aiStatus');
-  const detectBtn = document.getElementById('aiDetectBtn');
-  statusEl.innerHTML = '<span class="ai-loading"></span> AI 辨識中⋯請稍候';
-  detectBtn.disabled = true;
-  try {
-    const base64Data = aiImageData.split(',')[1];
-    const mimeType = aiImageData.split(';')[0].split(':')[1];
-    const response = await fetch(ZHIPU_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ZHIPU_API_KEY}` },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Data}` } },
-            { type: 'text', text: '這是一張麻將手牌照片。請辨識圖中所有麻將牌，並以 JSON 格式返回。每個牌用以下格式表示：萬子：1m-9m（如 1m 表示一萬），筒子：1p-9p（如 1p 表示一筒），索子：1s-9s（如 1s 表示一索），風牌：東=1z, 南=2z, 西=3z, 北=4z，三元牌：中=5z, 發=6z, 白=7z。請只返回一個 JSON 陣列，不要有任何其他文字，例如：["1m","2m","3m","1p","2p","5z"]。如果某些牌無法確定，請根據可見部分推測最可能的牌。' }
-          ]
-        }],
-        temperature: 0.1,
-        max_tokens: 1024
-      })
-    });
-    if (!response.ok) { const errText = await response.text(); throw new Error(`API 錯誤 (${response.status}): ${errText}`); }
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    let tileCodes = [];
-    try {
-      const jsonMatch = content.match(/\[[\s\S]*?\]/);
-      if (jsonMatch) tileCodes = JSON.parse(jsonMatch[0]);
-      else tileCodes = JSON.parse(content);
-    } catch (e) {
-      const matches = content.match(/\b[1-9][mpsz]\b/g);
-      if (matches) tileCodes = matches;
-      else throw new Error('無法解析 AI 返回的牌碼：' + content);
-    }
-    const tileIdMap = {
-      '1m': 'wan1', '2m': 'wan2', '3m': 'wan3', '4m': 'wan4', '5m': 'wan5', '6m': 'wan6', '7m': 'wan7', '8m': 'wan8', '9m': 'wan9',
-      '1p': 'tong1', '2p': 'tong2', '3p': 'tong3', '4p': 'tong4', '5p': 'tong5', '6p': 'tong6', '7p': 'tong7', '8p': 'tong8', '9p': 'tong9',
-      '1s': 'so1', '2s': 'so2', '3s': 'so3', '4s': 'so4', '5s': 'so5', '6s': 'so6', '7s': 'so7', '8s': 'so8', '9s': 'so9',
-      '1z': 'east', '2z': 'south', '3z': 'west', '4z': 'north', '5z': 'bak', '6z': 'fat', '7z': 'chung'
-    };
-    aiDetectedTiles = tileCodes.map(code => tileIdMap[code]).filter(id => id && TILE_MAP[id]);
-    const resultList = document.getElementById('aiResultList');
-    if (aiDetectedTiles.length === 0) {
-      statusEl.textContent = '⚠️ 未能辨識出任何牌，請重試或手動輸入';
-      detectBtn.disabled = false;
-      return;
-    }
-    statusEl.textContent = `✅ 辨識完成，共 ${aiDetectedTiles.length} 張牌`;
-    resultList.innerHTML = aiDetectedTiles.map((id, idx) => {
-      const t = TILE_MAP[id]; if (!t) return '';
-      const colorClass = t.color || 'black';
-      const inner = t.img ? `<img src="${t.img}" alt="${t.label}" style="width:100%;height:100%;object-fit:contain;">` : `<span class="${colorClass}">${t.label}</span>`;
-      return `<div class="ai-result-item"><div class="tile-mini">${inner}</div><span class="tile-name">${t.label}${t.type === 'num' ? (t.suit === 'wan' ? '萬' : t.suit === 'tong' ? '筒' : '索') : ''}</span><span class="tile-section">#${idx + 1}</span></div>`;
-    }).join('');
-    const applyBtn = document.createElement('button');
-    applyBtn.textContent = '📥 應用到手牌';
-    applyBtn.style.cssText = 'width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;';
-    applyBtn.onclick = applyAIDetectedTiles;
-    resultList.appendChild(applyBtn);
-  } catch (err) {
-    console.error('AI 辨識失敗:', err);
-    statusEl.textContent = '❌ 辨識失敗：' + err.message;
-    detectBtn.disabled = false;
-  }
-}
-
-function applyAIDetectedTiles() {
-  if (aiDetectedTiles.length === 0) { showToast('沒有可用的辨識結果'); return; }
-  openSection = []; closedSection = []; kongSection = [];
-  const tiles = [...aiDetectedTiles];
-  const counts = {};
-  tiles.forEach(id => counts[id] = (counts[id] || 0) + 1);
-  const kongCandidates = [];
-  const remainingTiles = [];
-  for (const id in counts) {
-    if (counts[id] === 4) kongCandidates.push(id);
-    else for (let i = 0; i < counts[id]; i++) remainingTiles.push(id);
-  }
-  kongCandidates.forEach(id => kongSection.push({ id, type: 'closed' }));
-  const maxHandTiles = 17 - kongSection.length * 3;
-  const handTiles = remainingTiles.slice(0, maxHandTiles);
-  closedSection = [...handTiles];
-  if (remainingTiles.length > maxHandTiles) showToast(`注意：辨識到 ${aiDetectedTiles.length} 張牌，已自動分配 ${kongSection.length} 組槓 + ${closedSection.length} 張手牌，超出部分已忽略`);
-  else showToast(`已應用：${kongSection.length} 組槓 + ${closedSection.length} 張手牌`);
-  refreshUI();
-  closeAIPanel();
-}
-
-// ==================== 初始化 ====================
 renderWall();
 refreshUI();
 </script>
